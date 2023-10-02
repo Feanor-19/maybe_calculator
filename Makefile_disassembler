@@ -11,7 +11,7 @@ CFLAGS = 	-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef \
 			-Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE
 
 PART_NAME 	= disassembler
-SOURCES 	= $(wildcard ./src/$(PART_NAME)/*.cpp)
+SOURCES 	= $(wildcard ./src/$(PART_NAME)/*.cpp) $(wildcard ./src/common/*.cpp)
 OBJFILES 	= $(SOURCES:.cpp=.o)
 OUT 		= $(PART_NAME).exe
 

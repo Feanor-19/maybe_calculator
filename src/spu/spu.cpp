@@ -4,6 +4,6 @@
 
 int main()
 {
-    printf("meow %d\n", x);
+    printf("spu\n");
     return 0;
 }

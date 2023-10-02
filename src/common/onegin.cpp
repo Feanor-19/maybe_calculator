@@ -77,7 +77,7 @@ Text parse_buf_to_text(FileBuf file_buf)
 
     Text text = {};
     text.line_array = line_array;
-    text.nLines = line;
+    text.nLines = (long unsigned int) line;
 
     return text;
 }
