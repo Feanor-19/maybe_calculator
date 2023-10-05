@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "parser_cmd_args.h"
+#include "../common/parser_cmd_args.h"
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     HOW TO ADD A NEW FLAG
@@ -19,26 +19,29 @@
     6) Profit!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
+//-------------------------------------------------------------------------------------------------------------
+
+const char *FILE_IN_DEFAULT_NAME = "asm_in.txt";
+const char *FILE_OUT_DEFAULT_NAME = "asm_out.txt";
+
+//-------------------------------------------------------------------------------------------------------------
+
 enum ConfigError
 {
-    NO_ERROR                    = 0,
-    ERROR_DATA_SOURCE           = 1,
-    ERROR_OUTPUT_DESTINATION    = 2,
+    CONFIG_NO_ERROR                    = 0,
+    CONFIG_ERROR_DATA_SOURCE           = 1,
+    CONFIG_ERROR_OUTPUT_DESTINATION    = 2,
 };
 
 /*!
     @brief Contains all configurable parametres of the automaton.
-    @note do_gen (-g) rewrites do_parse (-p)!
 */
 struct Config
 {
-    int do_tests;                       //!< Do tests and shut down (1 or 0).
     const char *data_source;            //!< Source of the data.
     const char *output_destination;     //!< Destination for the output.
-    int do_print_addresses;             //!< Used in print_text_to_stream
-    int do_sort_begin;                  //!< Do sort from the beginning of a line (1 or 0).
-    int do_sort_end;                    //!< Do sort from the end of a line (1 or 0). Rewrites do_sort_begin!
     ConfigError error;                  //!< ConfigError enum value.
+    int unread_flags;                   //!< Number of unrecognized flags.
 };
 
 //! @brief Gets all configurable parametres of the automaton.
@@ -46,7 +49,7 @@ struct Config
 //! @return All collected information packed in the Config struct.
 Config get_config(int argc, const char *argv[]);
 
-void print_config(Config cfg, FILE *stream);
+void print_config(FILE *stream, Config cfg);
 
 void print_cfg_error_message(FILE *stream, ConfigError error);
 

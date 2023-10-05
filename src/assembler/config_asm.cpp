@@ -1,21 +1,13 @@
-#include "config.h"
+#include "config_asm.h"
 
 const char* FLAG_HELP               = "-h";
-const char* FLAG_TESTS              = "-tests"; // --run-test
-const char* FLAG_INPUT_FILE         = "-fin";  // -i
-const char* FLAG_OUTPUT_FILE        = "-fout"; // -o
-const char* FLAG_PRINT_ADDRESS      = "-addr"; // --print-address
-const char* FLAG_SORT_FROM_BEGIN    = "-sb";
-const char* FLAG_SORT_FROM_END      = "-se";
+const char* FLAG_INPUT_FILE         = "-i";  // -i
+const char* FLAG_OUTPUT_FILE        = "-o"; // -o
 
 CmdLineFlag supported_flags[] = {
                                     { FLAG_HELP             , 0, 0, "" },
-                                    { FLAG_TESTS            , 0, 0, "" },
                                     { FLAG_INPUT_FILE       , 0, 1, "" },
-                                    { FLAG_OUTPUT_FILE      , 0, 1, "" },
-                                    { FLAG_PRINT_ADDRESS    , 0, 0, "" },
-                                    { FLAG_SORT_FROM_BEGIN  , 0, 0, "" },
-                                    { FLAG_SORT_FROM_END    , 0, 0, "" }
+                                    { FLAG_OUTPUT_FILE      , 0, 1, "" }
                                 };
 
 const char *help_message = "No help message yet :-(";
@@ -40,40 +32,38 @@ Config get_config(int argc, const char *argv[])
 
     int unread_flags = parse_cmd_args(argc, argv, N_FLAGS, supported_flags);
 
-    if ( unread_flags > 0 ) printf("WARNING: %d flags were unrecognized.\n", unread_flags);
-
     if ( extract(N_FLAGS, supported_flags, FLAG_HELP)->state )
     {
         printf("%s\n", help_message);
         exit(0);
     }
 
-    return assemble_config(N_FLAGS, supported_flags);
+    Config cfg = assemble_config(N_FLAGS, supported_flags);
+    cfg.unread_flags = unread_flags;
+    return cfg;
 }
 
 static Config assemble_config(size_t n_flags, CmdLineFlag flags[])
 {
     assert(flags != NULL);
 
-    Config config = {0, "", "", 0, 0, NO_ERROR};
+    Config config = {"", "", CONFIG_NO_ERROR};
 
     CmdLineFlag *p_curr_flag = NULL;
-
-    if ( ( p_curr_flag = extract(n_flags, supported_flags, FLAG_TESTS) )!= NULL
-       && p_curr_flag->state )
-    {
-        config.do_tests = 1;
-    }
 
     if ( ( p_curr_flag = extract(n_flags, supported_flags, FLAG_INPUT_FILE) )!= NULL
        && p_curr_flag->state )
     {
         if ( is_str_empty(p_curr_flag->add_arg) )
         {
-            config.error = ERROR_DATA_SOURCE;
+            config.error = CONFIG_ERROR_DATA_SOURCE;
             return config;
         }
         config.data_source = p_curr_flag->add_arg;
+    }
+    else
+    {
+        config.data_source = FILE_IN_DEFAULT_NAME;
     }
 
     if ( (p_curr_flag = extract(n_flags, supported_flags, FLAG_OUTPUT_FILE) )!= NULL
@@ -81,67 +71,46 @@ static Config assemble_config(size_t n_flags, CmdLineFlag flags[])
     {
         if ( is_str_empty(p_curr_flag->add_arg) )
         {
-            config.error = ERROR_OUTPUT_DESTINATION;
+            config.error = CONFIG_ERROR_OUTPUT_DESTINATION;
             return config;
         }
         config.output_destination = p_curr_flag->add_arg;
     }
-
-    if ( (p_curr_flag = extract(n_flags, supported_flags, FLAG_PRINT_ADDRESS) )!= NULL
-       && p_curr_flag->state )
+    else
     {
-        config.do_print_addresses = 1;
-    }
-
-    config.do_sort_begin = 0;
-    config.do_sort_end = 0;
-
-    if ( (p_curr_flag = extract(n_flags, supported_flags, FLAG_SORT_FROM_BEGIN) )!= NULL
-       && p_curr_flag->state )
-    {
-        config.do_sort_begin = 1;
-    }
-
-    if ( (p_curr_flag = extract(n_flags, supported_flags, FLAG_SORT_FROM_END) )!= NULL
-       && p_curr_flag->state )
-    {
-        config.do_sort_begin = 0;
-        config.do_sort_end = 1;
+        config.output_destination = FILE_OUT_DEFAULT_NAME;
     }
 
     return config;
 
 }
 
-void print_config(Config cfg, FILE *stream)
+void print_config(FILE *stream, Config cfg)
 {
     assert(stream != NULL);
-    assert(cfg.error == NO_ERROR);
+    assert(cfg.error == CONFIG_NO_ERROR);
 
     printf("The following configuration is set:\n"
     "data source:                               <%s>\n"
-    "output destination:                        <%s>\n"
-    "do sorting from the beginning of a line:   <%s>\n"
-    "do sorting from the end of a line:         <%s>\n",
-    cfg.data_source, cfg.output_destination,
-    ( cfg.do_sort_begin ? "yes" : "no" ), ( cfg.do_sort_end ? "yes" : "no" ) );
+    "output destination:                        <%s>\n",
+    cfg.data_source, cfg.output_destination);
 }
 
 void print_cfg_error_message(FILE *stream, ConfigError error)
 {
     assert(stream != NULL);
 
-    printf("Some error occured during confgiruation of the automoton: ");
+    printf("Some error occured during confgiruation of the prorgam: ");
 
     switch (error)
     {
-    case ERROR_DATA_SOURCE:
-        printf("Data source (input file) error.\n");
+    case CONFIG_ERROR_DATA_SOURCE:
+        fprintf(stream, "Data source (input file) error.\n");
         break;
-    case ERROR_OUTPUT_DESTINATION:
-        printf("Output destination (output file) error.\n");
+    case CONFIG_ERROR_OUTPUT_DESTINATION:
+        fprintf(stream, "Output destination (output file) error.\n");
         break;
-    case NO_ERROR:
+    case CONFIG_NO_ERROR:
     default:
         assert(0 && "Default case in ConfigError switch!");
         break;
