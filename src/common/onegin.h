@@ -6,12 +6,12 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-enum ErrorCodes
+enum OneginErrorCodes
 {
-    ERROR_NO        = 0,
-    ERROR_FILE_SIZE = 1,
-    ERROR_OPEN_FILE = 2,
-    ERROR_READ_FILE = 3,
+    ONEGIN_ERROR_NO        = 0,
+    ONEGIN_ERROR_FILE_SIZE = 1,
+    ONEGIN_ERROR_OPEN_FILE = 2,
+    ONEGIN_ERROR_READ_FILE = 3,
 };
 
 struct Text
@@ -28,19 +28,19 @@ struct FileBuf
 
 //---
 
-FileBuf read_file_to_buf(const char *file_name, ErrorCodes *err = NULL);
+FileBuf read_file_to_buf(const char *file_name, OneginErrorCodes *err = NULL);
 
 Text parse_buf_to_text(FileBuf file_buf);
 
 void print_text(Text text, int do_print_addresses);
 
-void print_text_to_file(const char *file_name, Text text, int do_print_addresses, ErrorCodes *err);
+void print_text_to_file(const char *file_name, Text text, int do_print_addresses, OneginErrorCodes *err);
 
 void print_text_to_stream( Text text, FILE *stream, int do_print_addresses );
 
 off_t get_file_size(const char *file_name);
 
-void print_error_message( ErrorCodes err );
+void print_onegin_error_message( OneginErrorCodes err );
 
 //! @brief Reads one line from stream WITHOUT '\n'!
 char *read_line(FILE *stream);

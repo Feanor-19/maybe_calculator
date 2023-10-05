@@ -6,7 +6,7 @@
 
 #include "mystring.h"
 
-FileBuf read_file_to_buf(const char *file_name, ErrorCodes *err)
+FileBuf read_file_to_buf(const char *file_name, OneginErrorCodes *err)
 {
     assert(file_name);
 
@@ -14,13 +14,13 @@ FileBuf read_file_to_buf(const char *file_name, ErrorCodes *err)
 
     off_t file_size = get_file_size(file_name);
     if (file_size == -1) {
-        if (err) *err = ERROR_FILE_SIZE;
+        if (err) *err = ONEGIN_ERROR_FILE_SIZE;
         return file_buf;
     }
 
     FILE *file_p = fopen(file_name, "r");
     if (file_p == NULL) {
-        if (err) *err = ERROR_OPEN_FILE;
+        if (err) *err = ONEGIN_ERROR_OPEN_FILE;
         return file_buf;
     }
 
@@ -29,7 +29,7 @@ FileBuf read_file_to_buf(const char *file_name, ErrorCodes *err)
     size_t buf_size = fread(buf, sizeof(char), file_size, file_p);
     if ( ferror(file_p) != 0 )
     {
-        if (err) *err = ERROR_READ_FILE;
+        if (err) *err = ONEGIN_ERROR_READ_FILE;
         free(buf);
         return file_buf;
     }
@@ -87,14 +87,14 @@ void print_text(Text text, int do_print_addresses)
     print_text_to_stream(text, stdout, do_print_addresses);
 }
 
-void print_text_to_file(const char *file_name, Text text, int do_print_addresses, ErrorCodes *err)
+void print_text_to_file(const char *file_name, Text text, int do_print_addresses, OneginErrorCodes *err)
 {
     assert(file_name);
 
     FILE *file_p = fopen(file_name, "w");
     if (!file_p)
     {
-        *err = ERROR_OPEN_FILE;
+        *err = ONEGIN_ERROR_OPEN_FILE;
         return;
     }
 
@@ -130,20 +130,20 @@ off_t get_file_size(const char *file_name)
     return st_buf.st_size;
 }
 
-void print_error_message( ErrorCodes err )
+void print_onegin_error_message( OneginErrorCodes err )
 {
     switch (err)
         {
-        case ERROR_OPEN_FILE:
+        case ONEGIN_ERROR_OPEN_FILE:
             fprintf(stderr, "ERROR: Can't open file!\n");
             break;
-        case ERROR_FILE_SIZE:
+        case ONEGIN_ERROR_FILE_SIZE:
             fprintf(stderr, "ERROR: Can't get file size!\n");
             break;
-        case ERROR_READ_FILE:
+        case ONEGIN_ERROR_READ_FILE:
             fprintf(stderr, "ERROR: Can't read file!\n");
             break;
-        case ERROR_NO:
+        case ONEGIN_ERROR_NO:
             assert(0 && "Unreacheable line reached!");
             break;
         default:
