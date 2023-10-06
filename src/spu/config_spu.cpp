@@ -95,11 +95,11 @@ static Config assemble_config(size_t n_flags, CmdLineFlag flags[])
             config.error = CONFIG_ERROR_PARAMS;
             return config;
         }
-        config.output_file_name = p_curr_flag->add_arg;
+        config.params_file_name = p_curr_flag->add_arg;
     }
     else
     {
-        config.output_file_name = FILE_OUT_DEFAULT_NAME;
+        config.params_file_name = FILE_PARAMS_DEFAULT_NAME;
     }
 
     return config;
