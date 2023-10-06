@@ -96,16 +96,6 @@ AssemblerError translate_and_write_to_output(Input input, const char *output_fil
     if (!buf) return ASM_ERROR_MEM_ALLOC;
     size_t buf_ind = 0;
 
-    /*
-    printf("buf_file: <");
-    for (size_t ind = 0; ind < input.file_buf.buf_size; ind++)
-    {
-        if (input.file_buf.buf[ind] == '\0') printf("*");
-        else printf("%c", input.file_buf.buf[ind]);
-    }
-    printf(">\n");
-    */
-
     for (unsigned long ind = 0; ind < input.text.nLines; ind++)
     {
         size_t cmd_end = 0;
