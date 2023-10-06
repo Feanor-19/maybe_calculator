@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <ctype.h>
 
 #include "config_asm.h"
 
@@ -6,7 +7,8 @@
 
 int main(int argc, const char *argv[])
 {
-    const char *str = "out";
+    /*
+    const char *str = "pu 12";
     size_t off = 0;
     Command cmd = get_command(str, &off);
     printf("!!!%d <%s>\n", cmd, str + off);
@@ -16,8 +18,19 @@ int main(int argc, const char *argv[])
         sscanf(str + off, "%d", &x);
         printf("!!!x: <%d>\n", x);
     }
+    */
 
-    /*
+   /*
+    char buf[] = "1234567890";
+    size_t buf_ind = 0;
+    buf_ind += sprintf(buf + buf_ind, "%s", "hi");
+    buf_ind += sprintf(buf + buf_ind, "%s", " world");
+    buf_ind += sprintf(buf + buf_ind, "%s", "!\n");
+    printf("! buf = <%s>", buf);
+    printf("@ buf + buf_ind = <%s>", buf + buf_ind);
+    */
+
+
     Config cfg = get_config(argc, argv);
     if (cfg.error)
     {
@@ -39,7 +52,7 @@ int main(int argc, const char *argv[])
     free_struct_input_file(input);
 
     fprintf(stdout, "%s is translated to %s!", input_file_name, output_file_name);
-    */
+
 }
 
 Input read_input_file(const char* input_file_name)
@@ -74,10 +87,37 @@ AssemblerError translate_and_write_to_output(Input input, const char *output_fil
     // которое было в изначальном
     char *buf = (char *) calloc(input.file_buf.buf_size, sizeof(char));
     if (!buf) return ASM_ERROR_MEM_ALLOC;
+    size_t buf_ind = 0;
 
     for (unsigned long ind = 0; ind < input.text.nLines; ind++)
     {
+        size_t cmd_end = 0;
+        Command cmd = get_command(input.text.line_array[ind], &cmd_end);
+        if (cmd == CMD_UNKNOWN)
+        {
+            fprintf(stderr, "ERROR: Unkown command on line %ld! The line is:\n<%s>\n",
+                    ind, input.text.line_array[ind]);
+            free(buf); // ???
+            return ASM_ERROR_UNKOWN_COMMAND;
+        }
 
+        buf_ind += sprintf(buf + buf_ind, "%d", cmd);
+
+        if (command_needs_arg[cmd])
+        {
+            int arg = 0;
+            if ( sscanf(input.text.line_array[ind] + cmd_end, "%d", &arg) != 1 )
+            {
+                fprintf(stderr, "ERROR: Can't get argument on line %ld! The line is:\n<%s>\n",
+                    ind, input.text.line_array[ind]);
+                free(buf); // ???
+                return ASM_ERROR_CMD_ARG;
+            }
+
+            buf_ind += sprintf(buf + buf_ind, " %d", arg);
+        }
+
+        buf_ind += sprintf(buf + buf_ind, "\n");
     }
 
     FILE* out = fopen(output_file_name, "w");
@@ -87,12 +127,10 @@ AssemblerError translate_and_write_to_output(Input input, const char *output_fil
         return ASM_ERROR_CANT_OPEN_OUTPUT_FILE;
     }
 
-    //пишем буффер в файл
+    fwrite(buf, sizeof(char), buf_ind, out);
 
     fclose(out);
-
     free(buf);
-
     return ASM_ERROR_NO_ERROR;
 }
 
@@ -104,14 +142,14 @@ Command get_command(const char *str, size_t *cmd_end_ptr)
     for (size_t cmd_ind = 1; cmd_ind < commands_list_len; cmd_ind++)
     {
         size_t str_ind = 0;
-        printf("~~~\ncmd_ind = %llu\n", cmd_ind);
+        //printf("~~~\ncmd_ind = %llu\n", cmd_ind);
         while (str[str_ind] == ' ' || str[str_ind] != '\0')
         {
-            printf("str[str_ind] = <%c>, commands_list[cmd_ind][str_ind] = <%c>\n",
-                    str[str_ind], commands_list[cmd_ind][str_ind]);
-            if (str[str_ind] != commands_list[cmd_ind][str_ind])
+            //printf("str[str_ind] = <%c>, commands_list[cmd_ind][str_ind] = <%c>\n",
+            //        str[str_ind], commands_list[cmd_ind][str_ind]);
+            if (tolower(str[str_ind]) != tolower(commands_list[cmd_ind][str_ind]))
             {
-                printf("break\n");
+                //printf("break\n");
                 break;
             }
 

@@ -11,6 +11,8 @@ enum AssemblerError
     ASM_ERROR_READ_INPUT_FILE           = 2,
     ASM_ERROR_CANT_OPEN_OUTPUT_FILE     = 3,
     ASM_ERROR_MEM_ALLOC                 = 4,
+    ASM_ERROR_UNKOWN_COMMAND            = 5,
+    ASM_ERROR_CMD_ARG                   = 6,
 };
 
 struct Input
@@ -35,6 +37,20 @@ const char *commands_list[] =
     "in",
     "out",
     "hlt"
+};
+
+//! @note MUST BE IN SYNC WITH ENUM COMMANDS!
+const int command_needs_arg[] =
+{
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 };
 
 const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
