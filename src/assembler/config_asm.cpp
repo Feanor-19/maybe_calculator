@@ -47,6 +47,10 @@ static Config assemble_config(size_t n_flags, CmdLineFlag flags[])
 {
     assert(flags != NULL);
 
+    const char *FILE_IN_DEFAULT_NAME = "asm_in.txt";
+    const char *FILE_OUT_DEFAULT_NAME = "asm_out.txt";
+
+
     Config config = {"", "", CONFIG_NO_ERROR};
 
     CmdLineFlag *p_curr_flag = NULL;
