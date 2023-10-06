@@ -47,6 +47,7 @@ int main(int argc, const char *argv[])
     if (input.err) return input.err;
 
     AssemblerError err = translate_and_write_to_output(input, output_file_name);
+    //printf("~~~%d\n", err);
     if (err) return err;
 
     free_struct_input_file(input);
@@ -77,6 +78,12 @@ Input read_input_file(const char* input_file_name)
     return input;
 }
 
+inline void print_asm_error(long int line, const char *str)
+{
+    fprintf(stderr, "ERROR on line %ld! The line is:\n<%s>\n",
+                    line, str);
+}
+
 AssemblerError translate_and_write_to_output(Input input, const char *output_file_name)
 {
     ASSERT_INPUT(input);
@@ -89,14 +96,24 @@ AssemblerError translate_and_write_to_output(Input input, const char *output_fil
     if (!buf) return ASM_ERROR_MEM_ALLOC;
     size_t buf_ind = 0;
 
+    /*
+    printf("buf_file: <");
+    for (size_t ind = 0; ind < input.file_buf.buf_size; ind++)
+    {
+        if (input.file_buf.buf[ind] == '\0') printf("*");
+        else printf("%c", input.file_buf.buf[ind]);
+    }
+    printf(">\n");
+    */
+
     for (unsigned long ind = 0; ind < input.text.nLines; ind++)
     {
         size_t cmd_end = 0;
         Command cmd = get_command(input.text.line_array[ind], &cmd_end);
         if (cmd == CMD_UNKNOWN)
         {
-            fprintf(stderr, "ERROR: Unkown command on line %ld! The line is:\n<%s>\n",
-                    ind, input.text.line_array[ind]);
+            print_asm_error(ind + 1, input.text.line_array[ind]);
+            //printf("### <%s>\n", input.text.line_array[ind]);
             free(buf); // ???
             return ASM_ERROR_UNKOWN_COMMAND;
         }
@@ -108,8 +125,7 @@ AssemblerError translate_and_write_to_output(Input input, const char *output_fil
             int arg = 0;
             if ( sscanf(input.text.line_array[ind] + cmd_end, "%d", &arg) != 1 )
             {
-                fprintf(stderr, "ERROR: Can't get argument on line %ld! The line is:\n<%s>\n",
-                    ind, input.text.line_array[ind]);
+                print_asm_error(ind + 1, input.text.line_array[ind]);
                 free(buf); // ???
                 return ASM_ERROR_CMD_ARG;
             }
@@ -142,14 +158,10 @@ Command get_command(const char *str, size_t *cmd_end_ptr)
     for (size_t cmd_ind = 1; cmd_ind < commands_list_len; cmd_ind++)
     {
         size_t str_ind = 0;
-        //printf("~~~\ncmd_ind = %llu\n", cmd_ind);
         while (str[str_ind] == ' ' || str[str_ind] != '\0')
         {
-            //printf("str[str_ind] = <%c>, commands_list[cmd_ind][str_ind] = <%c>\n",
-            //        str[str_ind], commands_list[cmd_ind][str_ind]);
             if (tolower(str[str_ind]) != tolower(commands_list[cmd_ind][str_ind]))
             {
-                //printf("break\n");
                 break;
             }
 

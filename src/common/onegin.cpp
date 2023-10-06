@@ -73,6 +73,11 @@ Text parse_buf_to_text(FileBuf file_buf)
         }
     }
 
+    if ( file_buf.buf[file_buf.buf_size - 1] == '\n' )
+    {
+        file_buf.buf[file_buf.buf_size - 1] = '\0';
+    }
+
     //printf("Info: curr_text_size = %u, free_place_in_line_arr = %u\n", curr_text_size, free_place_in_line_arr);
 
     Text text = {};
