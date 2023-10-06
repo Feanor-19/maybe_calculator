@@ -7,30 +7,6 @@
 
 int main(int argc, const char *argv[])
 {
-    /*
-    const char *str = "pu 12";
-    size_t off = 0;
-    Command cmd = get_command(str, &off);
-    printf("!!!%d <%s>\n", cmd, str + off);
-    if (cmd)
-    {
-        int x = 0;
-        sscanf(str + off, "%d", &x);
-        printf("!!!x: <%d>\n", x);
-    }
-    */
-
-   /*
-    char buf[] = "1234567890";
-    size_t buf_ind = 0;
-    buf_ind += sprintf(buf + buf_ind, "%s", "hi");
-    buf_ind += sprintf(buf + buf_ind, "%s", " world");
-    buf_ind += sprintf(buf + buf_ind, "%s", "!\n");
-    printf("! buf = <%s>", buf);
-    printf("@ buf + buf_ind = <%s>", buf + buf_ind);
-    */
-
-
     Config cfg = get_config(argc, argv);
     if (cfg.error)
     {
@@ -40,20 +16,16 @@ int main(int argc, const char *argv[])
 
     print_config(stdout, cfg);
 
-    const char *input_file_name = cfg.data_source;
-    const char *output_file_name = cfg.output_destination;
-
-    Input input = read_input_file(input_file_name);
+    Input input = read_input_file(cfg.input_file_name);
     if (input.err) return input.err;
 
-    AssemblerError err = translate_and_write_to_output(input, output_file_name);
+    AssemblerError err = translate_and_write_to_output(input, cfg.output_file_name);
     //printf("~~~%d\n", err);
     if (err) return err;
 
     free_struct_input_file(input);
 
-    fprintf(stdout, "%s is translated to %s!", input_file_name, output_file_name);
-
+    fprintf(stdout, "%s is translated to %s!", cfg.input_file_name, cfg.output_file_name);
 }
 
 Input read_input_file(const char* input_file_name)

@@ -28,6 +28,7 @@ enum ConfigError
     CONFIG_NO_ERROR     = 0,
     CONFIG_ERROR_INPUT  = 1,
     CONFIG_ERROR_OUTPUT = 2,
+    CONFIG_ERROR_PARAMS = 3,
 };
 
 /*!
@@ -35,8 +36,9 @@ enum ConfigError
 */
 struct Config
 {
-    const char *input_file_name;            //!< Source of the data.
-    const char *output_file_name;     //!< Destination for the output.
+    const char *input_file_name;        //!< Name of the file with program.
+    const char *output_file_name;       //!< Name of the file where to put translated to binary program.
+    const char *params_file_name;       //!< Name of the file to get params for command 'in' from.
     ConfigError error;                  //!< ConfigError enum value.
     int unread_flags;                   //!< Number of unrecognized flags.
 };

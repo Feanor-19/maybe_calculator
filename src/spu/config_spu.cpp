@@ -1,13 +1,15 @@
-#include "config_asm.h"
+#include "config_spu.h"
 
 const char* FLAG_HELP               = "-h";
-const char* FLAG_INPUT_FILE         = "-i";  // -i
-const char* FLAG_OUTPUT_FILE        = "-o"; // -o
+const char* FLAG_INPUT_FILE         = "-i";
+const char* FLAG_OUTPUT_FILE        = "-o";
+const char* FLAG_PARAMS_FILE        = "-p";
 
 CmdLineFlag supported_flags[] = {
                                     { FLAG_HELP             , 0, 0, "" },
                                     { FLAG_INPUT_FILE       , 0, 1, "" },
-                                    { FLAG_OUTPUT_FILE      , 0, 1, "" }
+                                    { FLAG_OUTPUT_FILE      , 0, 1, "" },
+                                    { FLAG_PARAMS_FILE      , 0, 1, "" }
                                 };
 
 const char *help_message = "No help message yet :-(";
@@ -47,10 +49,11 @@ static Config assemble_config(size_t n_flags, CmdLineFlag flags[])
 {
     assert(flags != NULL);
 
-    const char *FILE_IN_DEFAULT_NAME = "asm_in.txt";
-    const char *FILE_OUT_DEFAULT_NAME = "asm_out.txt";
+    const char *FILE_IN_DEFAULT_NAME        = "spu_in.txt";
+    const char *FILE_OUT_DEFAULT_NAME       = "spu_out.txt";
+    const char *FILE_PARAMS_DEFAULT_NAME    = "spu_params.txt";
 
-    Config config = {"", "", CONFIG_NO_ERROR};
+    Config config = {"", "", "", CONFIG_NO_ERROR};
 
     CmdLineFlag *p_curr_flag = NULL;
 
@@ -84,6 +87,21 @@ static Config assemble_config(size_t n_flags, CmdLineFlag flags[])
         config.output_file_name = FILE_OUT_DEFAULT_NAME;
     }
 
+    if ( (p_curr_flag = extract(n_flags, supported_flags, FLAG_PARAMS_FILE) )!= NULL
+       && p_curr_flag->state )
+    {
+        if ( is_str_empty(p_curr_flag->add_arg) )
+        {
+            config.error = CONFIG_ERROR_PARAMS;
+            return config;
+        }
+        config.output_file_name = p_curr_flag->add_arg;
+    }
+    else
+    {
+        config.output_file_name = FILE_OUT_DEFAULT_NAME;
+    }
+
     return config;
 
 }
@@ -94,9 +112,10 @@ void print_config(FILE *stream, Config cfg)
     assert(cfg.error == CONFIG_NO_ERROR);
 
     printf("The following configuration is set:\n"
-    "data source:                               <%s>\n"
-    "output destination:                        <%s>\n",
-    cfg.input_file_name, cfg.output_file_name);
+    "input file:                            <%s>\n"
+    "output file:                           <%s>\n"
+    "parametres file:                       <%s>\n",
+    cfg.input_file_name, cfg.output_file_name, cfg.params_file_name);
 }
 
 void print_cfg_error_message(FILE *stream, ConfigError error)
@@ -112,6 +131,9 @@ void print_cfg_error_message(FILE *stream, ConfigError error)
         break;
     case CONFIG_ERROR_OUTPUT:
         fprintf(stream, "Output file error.\n");
+        break;
+    case CONFIG_ERROR_PARAMS:
+        fprintf(stream, "Parametres file error.\n");
         break;
     case CONFIG_NO_ERROR:
     default:
