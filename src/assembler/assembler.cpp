@@ -50,7 +50,7 @@ Input read_input_file(const char* input_file_name)
     return input;
 }
 
-inline void print_asm_error(long int line, const char *str)
+inline void print_asm_error(unsigned long line, const char *str)
 {
     fprintf(stderr, "ERROR on line %ld! The line is:\n<%s>\n",
                     line, str);
