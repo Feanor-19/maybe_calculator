@@ -5,20 +5,21 @@ enum Command
 {
     CMD_UNKNOWN = 0,
     CMD_PUSH    = 1,
-    CMD_ADD     = 2,
-    CMD_SUB     = 3,
-    CMD_MUL     = 4,
-    CMD_DIV     = 5,
-    CMD_IN      = 6,
-    CMD_OUT     = 7,
-    CMD_HLT     = 8,
+    CMD_POP     = 2,
+    CMD_ADD     = 3,
+    CMD_SUB     = 4,
+    CMD_MUL     = 5,
+    CMD_DIV     = 6,
+    CMD_IN      = 7,
+    CMD_OUT     = 8,
+    CMD_HLT     = 9,
 };
 
 //--- BINARY FILE HEADER
 const char SIGN[4]  = {'S', 'F', '1', '9'};
-const int VERSION   = 2;
+const int VERSION   = 3;
 const size_t NUM_OF_BYTES_FOR_BIN_LEN = 4;
-const size_t HEADER_SIZE_IN_BYTES = sizeof(SIGN) + sizeof(VERSION) + sizeof(NUM_OF_BYTES_FOR_BIN_LEN);
+const size_t HEADER_SIZE_IN_BYTES = sizeof(SIGN) + sizeof(VERSION) + NUM_OF_BYTES_FOR_BIN_LEN;
 //---
 
 const char *registers[] =

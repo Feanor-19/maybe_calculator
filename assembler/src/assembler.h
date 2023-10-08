@@ -44,6 +44,7 @@ const char *commands_list[] =
 {
     "",
     "push",
+    "pop",
     "add",
     "sub",
     "mul",
@@ -57,6 +58,7 @@ const char *commands_list[] =
 const int command_needs_arg[] =
 {
     0,
+    1,
     1,
     0,
     0,

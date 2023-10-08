@@ -91,9 +91,9 @@ inline void print_asm_error(unsigned long line, const char *str)
 //! assembler.h
 inline void write_header_to_bin(char * bin_arr, size_t bin_final_len)
 {
-    *((int *) bin_arr) = *((int *) SIGN);
+    *((int *) bin_arr) = *((const int *) SIGN);
     *((int *) bin_arr + 1) = VERSION;
-    *((int *) bin_arr + 1) = (int) bin_final_len;
+    *((int *) bin_arr + 2) = (int) bin_final_len;
 }
 
 BinOut translate_to_binary(Input input)
@@ -105,16 +105,18 @@ BinOut translate_to_binary(Input input)
     // Примечание: считается, что всегда численное значение команды короче, чем ее словесное обозначение
     // (по количеству символов), а потому нам достаточно для транслированного текста того количества байтов,
     // которое было в изначальном
-    char *bin_arr = (char *) calloc(input.file_buf.buf_size, sizeof(char));
+    char *bin_arr = (char *) calloc(input.file_buf.buf_size + HEADER_SIZE_IN_BYTES, sizeof(char));
     if (!bin_arr)
     {
         bin_out.err = ASM_ERROR_MEM_ALLOC;
         return bin_out;
     }
-    size_t bin_arr_ind = 0;
+    size_t bin_arr_ind = HEADER_SIZE_IN_BYTES;
 
     for (unsigned long ind = 0; ind < input.text.nLines; ind++)
     {
+        if ( input.text.line_array[ind][0] == '\0' ) continue;
+
         size_t cmd_end = 0;
         Command cmd = get_command(input.text.line_array[ind], &cmd_end);
         if (cmd == CMD_UNKNOWN)
@@ -182,6 +184,7 @@ AssemblerError write_bin_to_output(BinOut bin_out, const char *output_file_name)
     return ASM_ERROR_NO_ERROR;
 }
 
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO: REWRITE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 Command get_command(const char *str, size_t *cmd_end_ptr)
 {
     assert(str);
@@ -255,6 +258,30 @@ inline CmdArg get_arg_push(Command cmd, const char *line, size_t cmd_end)
     return cmd_arg;
 }
 
+inline CmdArg get_arg_pop(Command cmd, const char *line, size_t cmd_end)
+{
+    assert(line);
+
+    CmdArg cmd_arg = {};
+
+    char rgstr[register_name_len] = "";
+    size_t reg_id = 0;
+
+    if ( sscanf(line + cmd_end, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) )
+    {
+        cmd_arg.cmd_byte = ((char) cmd) | bit_register;
+        cmd_arg.arg = (int) reg_id;
+        cmd_arg.arg_size = sizeof(int);
+        cmd_arg.err = ASM_ERROR_NO_ERROR;
+    }
+    else
+    {
+        cmd_arg.err = ASM_ERROR_CMD_ARG;
+    }
+
+    return cmd_arg;
+}
+
 CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
 {
     assert(line);
@@ -263,6 +290,9 @@ CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
     {
     case CMD_PUSH:
         return get_arg_push(cmd, line, cmd_end);
+        break;
+    case CMD_POP:
+        return get_arg_pop(cmd, line, cmd_end);
         break;
     case CMD_ADD:
     case CMD_DIV:
