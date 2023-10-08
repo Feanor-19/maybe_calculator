@@ -1,8 +1,8 @@
 #ifndef ASSEMBLER_H
 #define ASSEMBLER_H
 
-#include "../common/onegin.h"
-#include "../common/commands.h"
+#include "../../common/onegin.h"
+#include "../../common/commands.h"
 
 enum AssemblerError
 {
