@@ -13,7 +13,7 @@ FileBuf read_file_to_buf(const char *file_name, OneginErrorCodes *err)
     FileBuf file_buf = {};
 
     off_t file_size = get_file_size(file_name);
-    if (file_size == -1) {
+    if (file_size == -1 || file_size == 0) {
         if (err) *err = ONEGIN_ERROR_FILE_SIZE;
         return file_buf;
     }

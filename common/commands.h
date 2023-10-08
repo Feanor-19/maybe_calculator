@@ -14,6 +14,13 @@ enum Command
     CMD_HLT     = 8,
 };
 
+//--- BINARY FILE HEADER
+const char SIGN[4]  = {'S', 'F', '1', '9'};
+const int VERSION   = 2;
+const size_t NUM_OF_BYTES_FOR_BIN_LEN = 4;
+const size_t HEADER_SIZE_IN_BYTES = sizeof(SIGN) + sizeof(VERSION) + sizeof(NUM_OF_BYTES_FOR_BIN_LEN);
+//---
+
 const char *registers[] =
 {
     "rax",

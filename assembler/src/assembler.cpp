@@ -87,6 +87,15 @@ inline void print_asm_error(unsigned long line, const char *str)
                     line, str);
 }
 
+//! @brief Writes to the beginning of bin_arr the header, formed from constants in
+//! assembler.h
+inline void write_header_to_bin(char * bin_arr, size_t bin_final_len)
+{
+    *((int *) bin_arr) = *((int *) SIGN);
+    *((int *) bin_arr + 1) = VERSION;
+    *((int *) bin_arr + 1) = (int) bin_final_len;
+}
+
 BinOut translate_to_binary(Input input)
 {
     ASSERT_INPUT(input);
@@ -148,6 +157,8 @@ BinOut translate_to_binary(Input input)
         bin_arr_ind++;
     }
 
+    write_header_to_bin(bin_arr, bin_arr_ind);
+
     bin_out.bin_arr = bin_arr;
     bin_out.bin_arr_len = bin_arr_ind;
     bin_out.err = ASM_ERROR_NO_ERROR;
@@ -170,63 +181,6 @@ AssemblerError write_bin_to_output(BinOut bin_out, const char *output_file_name)
 
     return ASM_ERROR_NO_ERROR;
 }
-
-/*
-AssemblerError translate_and_write_to_output(Input input, const char *output_file_name)
-{
-    ASSERT_INPUT(input);
-    assert(output_file_name);
-
-    // Примечание: считается, что всегда численное значение команды короче, чем ее словесное обозначение
-    // (по количеству символов), а потому нам достаточно для транслированного текста того количества байтов,
-    // которое было в изначальном
-    char *buf = (char *) calloc(input.file_buf.buf_size, sizeof(char));
-    if (!buf) return ASM_ERROR_MEM_ALLOC;
-    size_t buf_ind = 0;
-
-    for (unsigned long ind = 0; ind < input.text.nLines; ind++)
-    {
-        size_t cmd_end = 0;
-        Command cmd = get_command(input.text.line_array[ind], &cmd_end);
-        if (cmd == CMD_UNKNOWN)
-        {
-            print_asm_error(ind + 1, input.text.line_array[ind]);
-            free(buf); // ???
-            return ASM_ERROR_UNKOWN_COMMAND;
-        }
-
-        buf_ind += sprintf(buf + buf_ind, "%d", cmd);
-
-        if (command_needs_arg[cmd])
-        {
-            int arg = 0;
-            if ( sscanf(input.text.line_array[ind] + cmd_end, "%d", &arg) != 1 )
-            {
-                print_asm_error(ind + 1, input.text.line_array[ind]);
-                free(buf); // ???
-                return ASM_ERROR_CMD_ARG;
-            }
-
-            buf_ind += sprintf(buf + buf_ind, " %d", arg);
-        }
-
-        buf_ind += sprintf(buf + buf_ind, "\n");
-    }
-
-    FILE* out = fopen(output_file_name, "w");
-    if (!out)
-    {
-        free(buf); // ???
-        return ASM_ERROR_CANT_OPEN_OUTPUT_FILE;
-    }
-
-    fwrite(buf, sizeof(char), buf_ind, out);
-
-    fclose(out);
-    free(buf);
-    return ASM_ERROR_NO_ERROR;
-}
-*/
 
 Command get_command(const char *str, size_t *cmd_end_ptr)
 {
