@@ -35,9 +35,9 @@ Input read_input_file(const char* input_file_name);
 
 SPUError run_program(Input prog, int *prog_res);
 
-SPUExecCmdRes exec_command(Input prog, Command cmd);
+SPUExecCmdRes exec_command(Stack *stk_p, const char *line, Command cmd);
 
-void free_struct_input_file(Input input);
+void free_struct_input(Input input);
 
 #define ASSERT_INPUT(input) do { assert(input.text.line_array); assert(input.file_buf.buf); } while (0)
 

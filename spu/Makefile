@@ -10,10 +10,9 @@ CFLAGS = 	-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef \
 			-Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits \
 			-Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE
 
-PART_NAME 	= disassembler
-SOURCES 	= $(wildcard ./src/$(PART_NAME)/*.cpp) $(wildcard ./src/common/*.cpp)
+SOURCES 	= $(wildcard ./src/*.cpp)
 OBJFILES 	= $(SOURCES:.cpp=.o)
-OUT 		= $(PART_NAME).exe
+OUT 		= spu.exe
 
 $(OUT) : $(OBJFILES)
 	@$(CC) -o $@ $(CFLAGS) $^

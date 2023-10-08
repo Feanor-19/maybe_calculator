@@ -22,6 +22,20 @@ struct Input
     AssemblerError err;
 };
 
+struct BinOut
+{
+    char *bin_arr;      //< Array of bytes - machine code.
+    size_t bin_arr_len; //< Length of non-empty part of arr.
+    AssemblerError err; //< Holds current error state.
+};
+
+struct CmdArg
+{
+    char cmd_byte;      //< 5 younger bits contain command, 3 older - type of arg
+    int arg;
+    size_t arg_size;    //< Number of bytes in arg which are actual informaton (arg_size <= sizeof(int))
+    AssemblerError err; //< //< Holds current error state.
+};
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -55,6 +69,9 @@ const int command_needs_arg[] =
 
 const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
 
+//! @brief Everything between this symbol and the end of line is considered as a comment.
+const char COMMENT_SYMB = ';';
+
 //-------------------------------------------------------------------------------------------------------------
 
 //! @brief Reads from input file using Onegin and returns text and buffer,
@@ -63,7 +80,14 @@ const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
 //! @return Struct Input.
 Input read_input_file(const char* input_file_name);
 
-AssemblerError translate_and_write_to_output(Input input, const char *output_file_name);
+//! @brief Does some preprocessing, changing lines in input.
+//! @details Cuts off commentaries.
+//! @param [in] input Input to preprocess.
+void preprocess_input(Input input);
+
+BinOut translate_to_binary(Input input);
+
+AssemblerError write_bin_to_output(BinOut bin_out, const char *output_file_name);
 
 //! @details Recieves string consisting of command's name and its argument (if needed),
 //! returns corresponding element from enum Command and sets *cmd_end_ptr to the index
@@ -74,10 +98,14 @@ AssemblerError translate_and_write_to_output(Input input, const char *output_fil
 //! @return Element of enum Command.
 Command get_command(const char *str, size_t *cmd_end_ptr);
 
+CmdArg get_arg(Command cmd, const char *line, size_t cmd_end);
+
 //! @brief Frees memory, allocated for input.text and
 //! input.file_buf.
 //! @param [in] input Struct input to free its elements.
-void free_struct_input_file(Input input);
+void free_struct_input(Input input);
+
+void free_struct_bin_out(BinOut bin_out);
 
 #define ASSERT_INPUT(input) do { assert(input.text.line_array); assert(input.file_buf.buf); } while (0)
 

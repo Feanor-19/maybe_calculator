@@ -1,28 +1,27 @@
 all: asm dis spu
 
-.PHONY: asm
-asm:
-	@make -f Makefile_assembler
-
-.PHONY: asm_clean
-asm_clean:
-	@make -f Makefile_assembler clean
+clean: asm_clean dis_clean spu_clean
 
 .PHONY: dis
 dis:
-	@make -f Makefile_disassembler
+	@make -C .\disassembler
 
 .PHONY: dis_clean
 dis_clean:
-	@make -f Makefile_disassembler clean
+	@make clean -C .\disassembler
 
 .PHONY: spu
 spu:
-	@make -f Makefile_spu
+	@make -C .\spu
 
 .PHONY: spu_clean
 spu_clean:
-	@make -f Makefile_spu clean
+	@make clean -C .\spu
 
-.PHONY: clean
-clean: asm_clean dis_clean spu_clean
+.PHONY: asm
+asm:
+	@make -C .\assembler
+
+.PHONY: asm_clean
+asm_clean:
+	@make clean -C .\assembler

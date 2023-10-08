@@ -25,7 +25,7 @@ int main(int argc, const char *argv[])
 
 
 
-    free_struct_input_file(program);
+    free_struct_input(program);
 
     return 0;
 }
@@ -61,7 +61,7 @@ inline void print_spu_error(unsigned long line, const char *str)
 SPUError run_program(Input prog, int *prog_res)
 {
     ASSERT_INPUT(prog);
-    assert(res);
+    assert(prog_res);
 
     Stack stk = {};
     stack_ctor(&stk);
@@ -75,7 +75,7 @@ SPUError run_program(Input prog, int *prog_res)
             return SPU_ERROR_IN_PROG;
         }
 
-        SPUExecCmdRes res = exec_command(prog, cmd);
+        SPUExecCmdRes res = exec_command(&stk, prog, cmd);
         if (res == EXEC_CMD_RES_HLT)
         {
             stack_pop(&stk, prog_res);
@@ -86,18 +86,70 @@ SPUError run_program(Input prog, int *prog_res)
     stack_dtor(&stk);
 }
 
-SPUExecCmdRes exec_command(Input prog, Command cmd)
+inline int get_arg(const char *line)
 {
-    ASSERT_INPUT(prog);
+    assert(line);
+
+    int x = 0;
+    sscanf(line, "%*s %s", &x);
+
+    return x;
+}
+
+inline void cmd_push(Stack *stk_p, const char* line)
+{
+
+}
+
+inline void cmd_add(Stack *stk_p, const char* line)
+{
+
+}
+
+inline void cmd_sub(Stack *stk_p, const char* line)
+{
+
+}
+
+inline void cmd_push(Stack *stk_p, const char* line)
+{
+
+}
+
+inline void cmd_push(Stack *stk_p, const char* line)
+{
+
+}
+
+inline void cmd_push(Stack *stk_p, const char* line)
+{
+
+}
+
+inline void cmd_push(Stack *stk_p, const char* line)
+{
+
+}
+
+
+SPUExecCmdRes exec_command(Stack *stk_p, const char *line, Command cmd)
+{
+    assert(line);
     assert(cmd != CMD_UNKNOWN);
 
     switch (cmd)
     {
     case CMD_PUSH:
-
+        stack_push(stk_p, get_arg(line));
         break;
     case CMD_ADD:
+        int pop1 = 0;
+        int pop2 = 0;
 
+        stack_pop(stk_p, &pop1);
+        stack_pop(stk_p, &pop2);
+
+        stack_push(stk_p, pop1 + pop2);
         break;
     case CMD_SUB:
 
@@ -124,7 +176,7 @@ SPUExecCmdRes exec_command(Input prog, Command cmd)
     return EXEC_CMD_RES_DEFAULT;
 }
 
-void free_struct_input_file(Input input)
+void free_struct_input(Input input)
 {
     ASSERT_INPUT(input);
 
