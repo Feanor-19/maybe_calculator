@@ -214,17 +214,17 @@ Command get_command(const char *str, size_t *cmd_end_ptr)
 }
 
 //! @brief Checks whether rgstr is a valid register's name or not.
-//! Returns register's id or 0.
+//! Returns register's id or -1.
 inline int check_reg_name(const char *rgstr)
 {
     for ( size_t ind = 0; ind < registers_len; ind++ )
     {
         if ( strcmp(rgstr, registers[ind]) == 0 )
         {
-            return 1;
+            return (int) ind;
         }
     }
-    return 0;
+    return -1;
 }
 
 inline CmdArg get_arg_push(Command cmd, const char *line, size_t cmd_end)
@@ -243,11 +243,11 @@ inline CmdArg get_arg_push(Command cmd, const char *line, size_t cmd_end)
         cmd_arg.arg_size = sizeof(int);
         cmd_arg.err = ASM_ERROR_NO_ERROR;
     }
-    else if ( sscanf(line + cmd_end, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) )
+    else if ( sscanf(line + cmd_end, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) != -1 )
     {
         cmd_arg.cmd_byte = ((char) cmd) | bit_register;
         cmd_arg.arg = (int) reg_id;
-        cmd_arg.arg_size = sizeof(int);
+        cmd_arg.arg_size = sizeof(char);
         cmd_arg.err = ASM_ERROR_NO_ERROR;
     }
     else
@@ -267,11 +267,11 @@ inline CmdArg get_arg_pop(Command cmd, const char *line, size_t cmd_end)
     char rgstr[register_name_len] = "";
     size_t reg_id = 0;
 
-    if ( sscanf(line + cmd_end, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) )
+    if ( sscanf(line + cmd_end, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) != -1)
     {
         cmd_arg.cmd_byte = ((char) cmd) | bit_register;
         cmd_arg.arg = (int) reg_id;
-        cmd_arg.arg_size = sizeof(int);
+        cmd_arg.arg_size = sizeof(char);
         cmd_arg.err = ASM_ERROR_NO_ERROR;
     }
     else
