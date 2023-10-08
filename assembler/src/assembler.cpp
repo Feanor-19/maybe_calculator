@@ -140,7 +140,7 @@ BinOut translate_to_binary(Input input)
             }
             else if (cmd_arg.arg_size == 4)
             {
-                *((int *) bin_arr) = (int) cmd_arg.arg;
+                *((int *) (bin_arr + bin_arr_ind)) = (int) cmd_arg.arg;
                 bin_arr_ind += 3; // тк после будет еще один bin_arr_ind
             }
         }
@@ -281,14 +281,14 @@ inline CmdArg get_arg_push(Command cmd, const char *line, size_t cmd_end)
     size_t reg_id = 0;
     if ( sscanf(line + cmd_end, "%d", &immediate_const) == 1 )
     {
-        cmd_arg.cmd_byte = ((char) cmd) || bit_immediate_const;
+        cmd_arg.cmd_byte = ((char) cmd) | bit_immediate_const;
         cmd_arg.arg = immediate_const;
         cmd_arg.arg_size = sizeof(int);
         cmd_arg.err = ASM_ERROR_NO_ERROR;
     }
     else if ( sscanf(line + cmd_end, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) )
     {
-        cmd_arg.cmd_byte = ((char) cmd) || bit_register;
+        cmd_arg.cmd_byte = ((char) cmd) | bit_register;
         cmd_arg.arg = (int) reg_id;
         cmd_arg.arg_size = sizeof(int);
         cmd_arg.err = ASM_ERROR_NO_ERROR;

@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "assembler"
+		},
+		{
+			"path": "disassembler"
+		},
+		{
+			"path": "spu"
+		},
+		{
+			"path": "."
+		}
+	]
+}
