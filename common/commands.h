@@ -78,7 +78,7 @@ const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
 
 //--- BINARY FILE HEADER
 const char SIGN[4]  = {'S', 'F', '1', '9'};
-const int VERSION   = 3;
+const int VERSION   = 4;
 const size_t NUM_OF_BYTES_FOR_BIN_LEN = 4;
 const size_t HEADER_SIZE_IN_BYTES = sizeof(SIGN) + sizeof(VERSION) + NUM_OF_BYTES_FOR_BIN_LEN;
 //---
@@ -96,5 +96,24 @@ const size_t registers_len = sizeof(registers)/sizeof(registers[0]);
 
 const char bit_immediate_const  = 1 << 5;
 const char bit_register         = 1 << 6;
+
+const size_t immediate_const_size_in_bytes = sizeof(int);
+const size_t register_id_size_in_bytes = sizeof(char);
+
+//-------------------------------------------------------------------------------------------------------
+
+#define sizearr(arr) sizeof(arr)/sizeof(arr[0])
+
+static_assert(sizearr(commands_list) == sizearr(command_needs_arg),
+                "commands_list's and command_needs_arg's sizes are not equal!");
+
+static_assert(sizearr(command_needs_arg) == sizearr(command_needs_im_const_arg),
+                "command_needs_arg's and command_needs_im_const_arg's sizes are not equal!");
+
+static_assert(sizearr(command_needs_im_const_arg) == sizearr(command_needs_register_arg),
+                "command_needs_im_const_arg's and command_needs_register_arg's sizes are snot equal!");
+
+
+#undef sizearr
 
 #endif /* COMMANDS_H */

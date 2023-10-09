@@ -66,8 +66,7 @@ Input read_input_file(const char* input_file_name)
     return input;
 }
 
-// !!!!!!!!!!!!!!!!!!!!!!!!! TODO TOLOWER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-void preprocess_input(Input input)
+inline void preprocess_input_handle_comments_(Input input)
 {
     ASSERT_INPUT_(input);
 
@@ -79,6 +78,26 @@ void preprocess_input(Input input)
             *c_p = '\0';
         }
     }
+}
+
+inline void preprocess_input_tolower(Input input)
+{
+    ASSERT_INPUT_(input);
+
+    for (size_t ind = 0; ind < input.file_buf.buf_size; ind++)
+    {
+        input.file_buf.buf[ind] = (char) tolower(input.file_buf.buf[ind]);
+    }
+}
+
+// !!!!!!!!!!!!!!!!!!!!!!!!! TODO TOLOWER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+void preprocess_input(Input input)
+{
+    ASSERT_INPUT_(input);
+
+    preprocess_input_handle_comments_(input);
+
+    preprocess_input_tolower(input);
 }
 
 inline void print_translation_error(unsigned long line, const char *str)
@@ -180,7 +199,6 @@ AssemblerError write_bin_to_output(BinOut bin_out, const char *output_file_name)
     return ASM_ERROR_NO_ERROR;
 }
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO: REWRITE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 Command get_command(const char *str, size_t *cmd_end_ptr)
 {
     assert(str);
@@ -217,24 +235,6 @@ Command get_command(const char *str, size_t *cmd_end_ptr)
                 }
             }
         }
-
-        /*
-        while (str[str_ind] == ' ' || str[str_ind] != '\0')
-        {
-            if (tolower(str[str_ind]) != tolower(commands_list[cmd_ind][str_ind]))
-            {
-                break;
-            }
-
-            str_ind++;
-        }
-
-        if ((str[str_ind] == ' ' || str[str_ind] == '\0') && commands_list[cmd_ind][str_ind] == '\0')
-        {
-            *cmd_end_ptr = str_ind;
-            return (Command) cmd_ind;
-        }
-        */
     }
 
     return CMD_UNKNOWN;
@@ -300,7 +300,7 @@ CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
     {
         cmd_arg.cmd_byte = ((char) cmd) | bit_immediate_const;
         cmd_arg.arg = (int) immediate_const;
-        cmd_arg.arg_size = sizeof(int);
+        cmd_arg.arg_size = immediate_const_size_in_bytes;
         cmd_arg.err = ASM_ERROR_NO_ERROR;
     }
     else if ( command_needs_register_arg[(int) cmd]
@@ -308,7 +308,7 @@ CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
     {
         cmd_arg.cmd_byte = ((char) cmd) | bit_register;
         cmd_arg.arg = (char) reg_id;
-        cmd_arg.arg_size = sizeof(char);
+        cmd_arg.arg_size = register_id_size_in_bytes;
         cmd_arg.err = ASM_ERROR_NO_ERROR;
     }
     else
