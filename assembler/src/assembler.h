@@ -39,38 +39,6 @@ struct CmdArg
 
 //-------------------------------------------------------------------------------------------------------------
 
-//! @note MUST BE IN SYNC WITH ENUM COMMANDS!
-const char *commands_list[] =
-{
-    "",
-    "push",
-    "pop",
-    "add",
-    "sub",
-    "mul",
-    "div",
-    "in",
-    "out",
-    "hlt"
-};
-
-//! @note MUST BE IN SYNC WITH ENUM COMMANDS!
-const int command_needs_arg[] =
-{
-    0,
-    1,
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-};
-
-const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
-
 //! @brief Everything between this symbol and the end of line is considered as a comment.
 const char COMMENT_SYMB = ';';
 

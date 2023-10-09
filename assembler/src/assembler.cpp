@@ -227,6 +227,8 @@ inline int check_reg_name(const char *rgstr)
     return -1;
 }
 
+/*
+
 inline CmdArg get_arg_push(Command cmd, const char *line, size_t cmd_end)
 {
     assert(line);
@@ -282,10 +284,41 @@ inline CmdArg get_arg_pop(Command cmd, const char *line, size_t cmd_end)
     return cmd_arg;
 }
 
+*/
 CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
 {
     assert(line);
 
+    CmdArg cmd_arg = {};
+
+    int immediate_const = 0;
+    char rgstr[register_name_len] = "";
+    int reg_id = 0;
+
+    if      ( command_needs_im_const_arg[(int) cmd]
+            && sscanf(line + cmd_end, "%d", &immediate_const) == 1 )
+    {
+        cmd_arg.cmd_byte = ((char) cmd) | bit_immediate_const;
+        cmd_arg.arg = immediate_const;
+        cmd_arg.arg_size = sizeof(int);
+        cmd_arg.err = ASM_ERROR_NO_ERROR;
+    }
+    else if ( command_needs_register_arg[(int) cmd]
+            && sscanf(line + cmd_end, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) != -1 )
+    {
+        cmd_arg.cmd_byte = ((char) cmd) | bit_register;
+        cmd_arg.arg = (int) reg_id;
+        cmd_arg.arg_size = sizeof(char);
+        cmd_arg.err = ASM_ERROR_NO_ERROR;
+    }
+    else
+    {
+        cmd_arg.err = ASM_ERROR_CMD_ARG;
+    }
+
+    return cmd_arg;
+
+    /*
     switch (cmd)
     {
     case CMD_PUSH:
@@ -308,6 +341,7 @@ CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
     }
 
     return {};
+    */
 }
 
 void free_struct_input(Input input)

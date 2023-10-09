@@ -15,6 +15,67 @@ enum Command
     CMD_HLT     = 9,
 };
 
+//! @note MUST BE IN SYNC WITH ENUM COMMANDS!
+const char *commands_list[] =
+{
+    "",     //CMD_UNKNOWN
+    "push", //CMD_PUSH
+    "pop",  //CMD_POP
+    "add",  //CMD_ADD
+    "sub",  //CMD_SUB
+    "mul",  //CMD_MUL
+    "div",  //CMD_DIV
+    "in",   //CMD_IN
+    "out",  //CMD_OUT
+    "hlt"   //CMD_HLT
+};
+
+//! @note MUST BE IN SYNC WITH ENUM COMMANDS!
+const int command_needs_im_const_arg[] =
+{
+    0,  //CMD_UNKNOWN
+    1,  //CMD_PUSH
+    0,  //CMD_POP
+    0,  //CMD_ADD
+    0,  //CMD_SUB
+    0,  //CMD_MUL
+    0,  //CMD_DIV
+    0,  //CMD_IN
+    0,  //CMD_OUT
+    0   //CMD_HLT
+};
+
+//! @note MUST BE IN SYNC WITH ENUM COMMANDS!
+const int command_needs_register_arg[] =
+{
+    0,  //CMD_UNKNOWN
+    1,  //CMD_PUSH
+    1,  //CMD_POP
+    0,  //CMD_ADD
+    0,  //CMD_SUB
+    0,  //CMD_MUL
+    0,  //CMD_DIV
+    0,  //CMD_IN
+    0,  //CMD_OUT
+    0   //CMD_HLT
+};
+
+//! @note MUST BE IN SYNC WITH ENUM COMMANDS!
+const int command_needs_arg[] =
+{
+    command_needs_im_const_arg[0] || command_needs_register_arg[0],  //CMD_UNKNOWN
+    command_needs_im_const_arg[1] || command_needs_register_arg[1],  //CMD_PUSH
+    command_needs_im_const_arg[2] || command_needs_register_arg[2],  //CMD_POP
+    command_needs_im_const_arg[3] || command_needs_register_arg[3],  //CMD_ADD
+    command_needs_im_const_arg[4] || command_needs_register_arg[4],  //CMD_SUB
+    command_needs_im_const_arg[5] || command_needs_register_arg[5],  //CMD_MUL
+    command_needs_im_const_arg[6] || command_needs_register_arg[6],  //CMD_DIV
+    command_needs_im_const_arg[7] || command_needs_register_arg[7],  //CMD_IN
+    command_needs_im_const_arg[8] || command_needs_register_arg[8],  //CMD_OUT
+    command_needs_im_const_arg[9] || command_needs_register_arg[9]   //CMD_HLT
+};
+const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
+
 //--- BINARY FILE HEADER
 const char SIGN[4]  = {'S', 'F', '1', '9'};
 const int VERSION   = 3;
