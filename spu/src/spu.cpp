@@ -60,7 +60,7 @@ inline void print_spu_error(unsigned long line, const char *str)
 
 SPUError run_program(Input prog, int *prog_res)
 {
-    ASSERT_INPUT(prog);
+    ASSERT_INPUT_(prog);
     assert(prog_res);
 
     Stack stk = {};
@@ -178,7 +178,7 @@ SPUExecCmdRes exec_command(Stack *stk_p, const char *line, Command cmd)
 
 void free_struct_input(Input input)
 {
-    ASSERT_INPUT(input);
+    ASSERT_INPUT_(input);
 
     free(input.file_buf.buf);
     input.file_buf.buf = NULL;

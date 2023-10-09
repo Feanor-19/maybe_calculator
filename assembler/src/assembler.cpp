@@ -17,27 +17,26 @@ int main(int argc, const char *argv[])
     print_config(stdout, cfg);
 
     Input input = read_input_file(cfg.input_file_name);
-    if (input.err) return input.err;
+    CHECK_ERR_(input.err);
 
     preprocess_input(input);
 
-    //AssemblerError err = translate_and_write_to_output(input, cfg.output_file_name);
-    //if (err) return err;
-
     BinOut bin_out = translate_to_binary(input);
-    if (bin_out.err) return bin_out.err;
+    CHECK_ERR_(bin_out.err);
 
     //---
+    /*
     printf("bin:\n");
     for (size_t ind = 0; ind < bin_out.bin_arr_len; ind++)
     {
         printf("%d ", bin_out.bin_arr[ind]);
     }
     printf("\n");
+    */
     //---
 
     AssemblerError err = write_bin_to_output(bin_out, cfg.output_file_name);
-    if (err) return err;
+    CHECK_ERR_(err);
 
     free_struct_input(input);
     free_struct_bin_out(bin_out);
@@ -69,7 +68,7 @@ Input read_input_file(const char* input_file_name)
 
 void preprocess_input(Input input)
 {
-    ASSERT_INPUT(input);
+    ASSERT_INPUT_(input);
 
     for (unsigned long ind = 0; ind < input.text.nLines; ind++)
     {
@@ -81,7 +80,7 @@ void preprocess_input(Input input)
     }
 }
 
-inline void print_asm_error(unsigned long line, const char *str)
+inline void print_translation_error(unsigned long line, const char *str)
 {
     fprintf(stderr, "ERROR on line %ld! The line is:\n<%s>\n",
                     line, str);
@@ -98,7 +97,7 @@ inline void write_header_to_bin(char * bin_arr, size_t bin_final_len)
 
 BinOut translate_to_binary(Input input)
 {
-    ASSERT_INPUT(input);
+    ASSERT_INPUT_(input);
 
     BinOut bin_out = {};
 
@@ -121,7 +120,7 @@ BinOut translate_to_binary(Input input)
         Command cmd = get_command(input.text.line_array[ind], &cmd_end);
         if (cmd == CMD_UNKNOWN)
         {
-            print_asm_error(ind + 1, input.text.line_array[ind]);
+            print_translation_error(ind + 1, input.text.line_array[ind]);
             free(bin_arr); // ???
             bin_out.err = ASM_ERROR_UNKOWN_COMMAND;
             return bin_out;
@@ -131,11 +130,6 @@ BinOut translate_to_binary(Input input)
 
         if (command_needs_arg[cmd])
         {
-            // вызываем функцию, которая выясняет какой именно доп аргумент у команды,
-            // соттветсвенно возвращает новое значение cmd_byte (в нем поменяны левые три бита)
-            // размер в байтах аргумента и сам аргумент (который всегда int, но если размер аргумента
-            // один байт, то читаем из инта только младший байт)
-
             CmdArg cmd_arg = get_arg(cmd, input.text.line_array[ind], cmd_end);
             if (cmd_arg.err)
             {
@@ -143,6 +137,7 @@ BinOut translate_to_binary(Input input)
                 return bin_out;
             }
 
+            // перезаписываем тот же байт в bin_arr
             bin_arr[bin_arr_ind++] = cmd_arg.cmd_byte;
 
             if (cmd_arg.arg_size == 1)
@@ -227,64 +222,37 @@ inline int check_reg_name(const char *rgstr)
     return -1;
 }
 
-/*
-
-inline CmdArg get_arg_push(Command cmd, const char *line, size_t cmd_end)
+void print_asm_error_message(AssemblerError err)
 {
-    assert(line);
+    assert(err);
 
-    CmdArg cmd_arg = {};
-
-    int immediate_const = 0;
-    char rgstr[register_name_len] = "";
-    size_t reg_id = 0;
-    if ( sscanf(line + cmd_end, "%d", &immediate_const) == 1 )
+    switch (err)
     {
-        cmd_arg.cmd_byte = ((char) cmd) | bit_immediate_const;
-        cmd_arg.arg = immediate_const;
-        cmd_arg.arg_size = sizeof(int);
-        cmd_arg.err = ASM_ERROR_NO_ERROR;
+    case ASM_ERROR_GET_IN_OUT_FILES_NAMES:
+        fprintf(stderr, "ASSEMBLER ERROR: Can't get input and output files' names!\n");
+        break;
+    case ASM_ERROR_READ_INPUT_FILE:
+        fprintf(stderr, "ASSEMBLER ERROR: Can't read input file!\n");
+        break;
+    case ASM_ERROR_CANT_OPEN_OUTPUT_FILE:
+        fprintf(stderr, "ASSEMBLER ERROR: Can't open output file!\n");
+        break;
+    case ASM_ERROR_MEM_ALLOC:
+        fprintf(stderr, "ASSEMBLER ERROR: Can't allocate memory!\n");
+        break;
+    case ASM_ERROR_UNKOWN_COMMAND:
+        fprintf(stderr, "ASSEMBLER ERROR: Unknown command in the input file!\n");
+        break;
+    case ASM_ERROR_CMD_ARG:
+        fprintf(stderr, "ASSEMBLER ERROR: Invalid type of argument!\n");
+        break;
+    case ASM_ERROR_NO_ERROR:
+    default:
+        assert(0 && "Unreacheable default case in switch!");
+        break;
     }
-    else if ( sscanf(line + cmd_end, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) != -1 )
-    {
-        cmd_arg.cmd_byte = ((char) cmd) | bit_register;
-        cmd_arg.arg = (int) reg_id;
-        cmd_arg.arg_size = sizeof(char);
-        cmd_arg.err = ASM_ERROR_NO_ERROR;
-    }
-    else
-    {
-        cmd_arg.err = ASM_ERROR_CMD_ARG;
-    }
-
-    return cmd_arg;
 }
 
-inline CmdArg get_arg_pop(Command cmd, const char *line, size_t cmd_end)
-{
-    assert(line);
-
-    CmdArg cmd_arg = {};
-
-    char rgstr[register_name_len] = "";
-    size_t reg_id = 0;
-
-    if ( sscanf(line + cmd_end, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) != -1)
-    {
-        cmd_arg.cmd_byte = ((char) cmd) | bit_register;
-        cmd_arg.arg = (int) reg_id;
-        cmd_arg.arg_size = sizeof(char);
-        cmd_arg.err = ASM_ERROR_NO_ERROR;
-    }
-    else
-    {
-        cmd_arg.err = ASM_ERROR_CMD_ARG;
-    }
-
-    return cmd_arg;
-}
-
-*/
 CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
 {
     assert(line);
@@ -299,7 +267,7 @@ CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
             && sscanf(line + cmd_end, "%d", &immediate_const) == 1 )
     {
         cmd_arg.cmd_byte = ((char) cmd) | bit_immediate_const;
-        cmd_arg.arg = immediate_const;
+        cmd_arg.arg = (int) immediate_const;
         cmd_arg.arg_size = sizeof(int);
         cmd_arg.err = ASM_ERROR_NO_ERROR;
     }
@@ -307,7 +275,7 @@ CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
             && sscanf(line + cmd_end, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) != -1 )
     {
         cmd_arg.cmd_byte = ((char) cmd) | bit_register;
-        cmd_arg.arg = (int) reg_id;
+        cmd_arg.arg = (char) reg_id;
         cmd_arg.arg_size = sizeof(char);
         cmd_arg.err = ASM_ERROR_NO_ERROR;
     }
@@ -317,36 +285,11 @@ CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
     }
 
     return cmd_arg;
-
-    /*
-    switch (cmd)
-    {
-    case CMD_PUSH:
-        return get_arg_push(cmd, line, cmd_end);
-        break;
-    case CMD_POP:
-        return get_arg_pop(cmd, line, cmd_end);
-        break;
-    case CMD_ADD:
-    case CMD_DIV:
-    case CMD_HLT:
-    case CMD_IN:
-    case CMD_MUL:
-    case CMD_OUT:
-    case CMD_SUB:
-    case CMD_UNKNOWN:
-    default:
-        assert(0 && "Default case in switch!");
-        break;
-    }
-
-    return {};
-    */
 }
 
 void free_struct_input(Input input)
 {
-    ASSERT_INPUT(input);
+    ASSERT_INPUT_(input);
 
     free(input.file_buf.buf);
     input.file_buf.buf = NULL;

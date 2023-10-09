@@ -70,6 +70,8 @@ Command get_command(const char *str, size_t *cmd_end_ptr);
 
 CmdArg get_arg(Command cmd, const char *line, size_t cmd_end);
 
+void print_asm_error_message(AssemblerError err);
+
 //! @brief Frees memory, allocated for input.text and
 //! input.file_buf.
 //! @param [in] input Struct input to free its elements.
@@ -77,6 +79,8 @@ void free_struct_input(Input input);
 
 void free_struct_bin_out(BinOut bin_out);
 
-#define ASSERT_INPUT(input) do { assert(input.text.line_array); assert(input.file_buf.buf); } while (0)
+#define ASSERT_INPUT_(input) do { assert(input.text.line_array); assert(input.file_buf.buf); } while (0)
+
+#define CHECK_ERR_(err) if ( (err) ) { print_asm_error_message((err)); return (err); }
 
 #endif /* ASSEMBLER_H */
