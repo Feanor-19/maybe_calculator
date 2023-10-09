@@ -66,6 +66,7 @@ Input read_input_file(const char* input_file_name)
     return input;
 }
 
+// !!!!!!!!!!!!!!!!!!!!!!!!! TODO TOLOWER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 void preprocess_input(Input input)
 {
     ASSERT_INPUT_(input);
@@ -188,6 +189,36 @@ Command get_command(const char *str, size_t *cmd_end_ptr)
     for (size_t cmd_ind = 1; cmd_ind < commands_list_len; cmd_ind++)
     {
         size_t str_ind = 0;
+
+        while(1)
+        {
+            if ( str[str_ind] == commands_list[cmd_ind][str_ind] )
+            {
+                if ( str[str_ind] == '\0' )
+                {
+                    *cmd_end_ptr = str_ind;
+                    return (Command) cmd_ind;
+                }
+                else
+                {
+                    str_ind++;
+                }
+            }
+            else
+            {
+                if( str[str_ind] == ' ' && commands_list[cmd_ind][str_ind] == '\0' )
+                {
+                    *cmd_end_ptr = str_ind;
+                    return (Command) cmd_ind;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        /*
         while (str[str_ind] == ' ' || str[str_ind] != '\0')
         {
             if (tolower(str[str_ind]) != tolower(commands_list[cmd_ind][str_ind]))
@@ -203,6 +234,7 @@ Command get_command(const char *str, size_t *cmd_end_ptr)
             *cmd_end_ptr = str_ind;
             return (Command) cmd_ind;
         }
+        */
     }
 
     return CMD_UNKNOWN;
