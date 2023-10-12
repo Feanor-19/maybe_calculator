@@ -196,24 +196,53 @@ inline void print_spu_registers_(SPU *spu_ptr)
     }
 }
 
-inline void print_spu_cs_(SPU *spu_ptr)
+inline void print_header_bytes_(const char* sign,
+                                const int version,
+                                const size_t binary_size_in_bytes)
+{
+    for (size_t ind = 0; ind < sizeof(int); ind++)
+    {
+        fprintf(stderr, "%02X ", sign[ind] );
+    }
+
+    for (size_t ind = 0; ind < sizeof(int); ind++)
+    {
+        fprintf(stderr, "%02X ", ( (char*) &version )[ind] );
+    }
+
+    for (size_t ind = 0; ind < sizeof(int); ind++)
+    {
+        fprintf(stderr, "%02X ", ( (char*) &binary_size_in_bytes )[ind] );
+    }
+}
+
+inline void print_spu_header_and_cs_(SPU *spu_ptr)
 {
     assert(spu_ptr);
 
-    fprintf(stderr, "CODE SEGMENT:\n{\n");
+    fprintf(stderr, "HEADER + CODE SEGMENT:\n{\n");
+
+    print_header_bytes_(SIGN, VERSION, spu_ptr->cs_size + HEADER_SIZE_IN_BYTES);
 
     const size_t row_width = 16;
 
-    size_t rows_count = spu_ptr->cs_size / row_width + ( spu_ptr->cs_size % row_width != 0 );
+    size_t rows_count = (spu_ptr->cs_size + HEADER_SIZE_IN_BYTES) / row_width + ( spu_ptr->cs_size % row_width != 0 );
     for (size_t row = 0; row < rows_count; row++ )
     {
         for (size_t col = 0; col < row_width; col++)
         {
+            if (row == 0 && col == 0)
+            {
+                // because header is already printed
+                col = HEADER_SIZE_IN_BYTES;
+            }
+
             // если вышли за границу массива то break!!!
-            if ( row*row_width + col >= spu_ptr->cs_size )
+            if ( row*row_width + col - HEADER_SIZE_IN_BYTES >= spu_ptr->cs_size )
                 break;
 
-            fprintf(stderr, "%02X ", spu_ptr->cs[row*row_width + col]);
+            fprintf(stderr, "%02X ",
+                    spu_ptr->cs[row*row_width + col - HEADER_SIZE_IN_BYTES]);
         }
         putc('\n', stderr);
     }
@@ -234,7 +263,7 @@ void SPU_dump_( SPU* spu_ptr,
 
     if (spu_ptr->cs)
     {
-        print_spu_cs_(spu_ptr);
+        print_spu_header_and_cs_(spu_ptr);
     }
 
     fprintf(stderr, "STACK DUMP:\n");
