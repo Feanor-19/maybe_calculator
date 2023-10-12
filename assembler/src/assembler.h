@@ -81,6 +81,6 @@ void free_struct_bin_out(BinOut bin_out);
 
 #define ASSERT_INPUT_(input) do { assert(input.text.line_array); assert(input.file_buf.buf); } while (0)
 
-#define CHECK_ERR_(err) if ( (err) ) { print_asm_error_message((err)); return (err); }
+#define CHECK_ERR_(err) do{if ( (err) ) { print_asm_error_message((err)); return (err); }} while(0)
 
 #endif /* ASSEMBLER_H */

@@ -83,7 +83,7 @@ const size_t NUM_OF_BYTES_FOR_BIN_LEN = 4;
 const size_t HEADER_SIZE_IN_BYTES = sizeof(SIGN) + sizeof(VERSION) + NUM_OF_BYTES_FOR_BIN_LEN;
 //---
 
-const char *registers[] =
+const char *registers_names[] =
 {
     "rax",
     "rbx",
@@ -92,7 +92,7 @@ const char *registers[] =
 };
 
 const size_t register_name_len = 3;
-const size_t registers_len = sizeof(registers)/sizeof(registers[0]);
+const size_t num_of_registers = sizeof(registers_names)/sizeof(registers_names[0]);
 
 const char bit_immediate_const  = 1 << 5;
 const char bit_register         = 1 << 6;
@@ -113,6 +113,7 @@ static_assert(sizearr(command_needs_arg) == sizearr(command_needs_im_const_arg),
 static_assert(sizearr(command_needs_im_const_arg) == sizearr(command_needs_register_arg),
                 "command_needs_im_const_arg's and command_needs_register_arg's sizes are snot equal!");
 
+static_assert(sizeof(SIGN) == sizeof(int), "SIGN must be as long as int is!");
 
 #undef sizearr
 

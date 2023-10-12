@@ -21,13 +21,13 @@
 
 /*
     USED DEFINES:
-    1) STACK_DO_DUMP
-    2) STACK_USE_POISON
-    3) STACK_ABORT_ON_DUMP
-    4) STACK_DUMP_ON_INVALID_POP
-    5) STACK_USE_PROTECTION_CANARY
-    6) STACK_USE_PROTECTION_HASH
-    7) STACK_FULL_DEBUG_INFO
+#define STACK_DO_DUMP
+#define STACK_USE_POISON
+#define STACK_ABORT_ON_DUMP
+#define STACK_DUMP_ON_INVALID_POP
+#define STACK_USE_PROTECTION_CANARY
+#define STACK_USE_PROTECTION_HASH
+#define STACK_FULL_DEBUG_INFO
 */
 
 //--------------------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ enum StackErrorCode
 //! @note size may equal capacity, but next push() will call realloc().
 //! @note Data pointer equalling NULL is considered fine only if
 //! size == 0 and capacity == 0!
-//! @note IF YOU CHANGE THIS ENUM, DON'T FORGET TO CHANGE print_verify_res()!!!
+//! @note IF YOU CHANGE THIS ENUM, DON'T FORGET TO CHANGE print_stack_verify_res()!!!
 enum StackVerifyResFlag
 {
     STACK_VERIFY_NULL_PNT           = 1 << 0,  //< Passed pointer to the stack is NULL.
@@ -93,7 +93,7 @@ enum StackVerifyResFlag
 #endif
 };
 //! @note MUST BE IN SYNC WITH StackVerifyResFlag enum above!!!
-const char *verification_messages[] =
+const char *stack_verification_messages[] =
 {
       "1: Passed pointer to the stack is NULL.",
       "2: Pointer to data is NULL and either size != 0 or capacity != 0.",
@@ -111,14 +111,14 @@ const char *verification_messages[] =
 };
 
 //! @brief Gets verification result and prints corresponding error message for every error.
-inline void print_verify_res(FILE *stream, int verify_res)
+inline void print_stack_verify_res(FILE *stream, int verify_res)
 {
     fprintf(stream, "Stack verification result: <%d>\n", verify_res);
-    for (size_t ind = 0; ind < sizeof(verification_messages)/sizeof(verification_messages[0]); ind++)
+    for (size_t ind = 0; ind < sizeof(stack_verification_messages)/sizeof(stack_verification_messages[0]); ind++)
     {
         if (verify_res & ( 1 << ind ))
         {
-            printf("----> %s\n", verification_messages[ind]);
+            printf("----> %s\n", stack_verification_messages[ind]);
         }
     }
 }
@@ -822,7 +822,7 @@ void stack_dump_(Stack *stk, int verify_res, const char *file, const int line, c
     print_curr_local_time_(stderr);
     fprintf(stderr, "\n");
 
-    print_verify_res(stderr, verify_res);
+    print_stack_verify_res(stderr, verify_res);
 
     fprintf(stderr, "Stack[%p] \"%s\" declared in %s(%d), in function %s. "
                     "STACK_DUMP() called from %s(%d), from function %s.\n", (void *)    stk,

@@ -244,9 +244,9 @@ Command get_command(const char *str, size_t *cmd_end_ptr)
 //! Returns register's id or -1.
 inline int check_reg_name(const char *rgstr)
 {
-    for ( size_t ind = 0; ind < registers_len; ind++ )
+    for ( size_t ind = 0; ind < num_of_registers; ind++ )
     {
-        if ( strcmp(rgstr, registers[ind]) == 0 )
+        if ( strcmp(rgstr, registers_names[ind]) == 0 )
         {
             return (int) ind;
         }
