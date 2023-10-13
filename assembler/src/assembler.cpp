@@ -90,7 +90,6 @@ inline void preprocess_input_tolower(Input input)
     }
 }
 
-// !!!!!!!!!!!!!!!!!!!!!!!!! TODO TOLOWER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 void preprocess_input(Input input)
 {
     ASSERT_INPUT_(input);

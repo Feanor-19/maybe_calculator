@@ -4,50 +4,42 @@
 #include "../../common/onegin.h"
 #include "../../common/commands.h"
 
-/*
-    USED DEFINES:
-#define SPU_DO_DUMP
-
-*/
-
-const char* spu_error_messages[] =
+const char* spu_status_messages[] =
 {
-    "SPU_ERROR_NO_ERROR",
-    "SPU_ERROR_GET_IN_OUT_FILES_NAMES",
-    "SPU_ERROR_READ_INPUT_FILE",
-    "SPU_ERROR_IN_PROG",
-    "SPU_ERROR_NULL_SPU_PTR",
-    "SPU_ERROR_CONFIG_HAS_ERROR",
-    "SPU_ERROR_MEM_ALLOC_ERROR",
-    "SPU_ERROR_INP_FILE_HEADER_CORRUPTED",
-    "SPU_ERROR_ZERO_BYTES_OF_CODE",
-    "SPU_ERROR_HEADER_WRONG_SIGN",
-    "SPU_ERROR_INPUT_FILE_WRONG_VERSION",
-    "SPU_ERROR_INPUT_FILE_CODE_CORRUPTED",
-    "SPU_ERROR_STACK_ERROR"
+    "SPU_STATUS_OK",
+    "SPU_STATUS_HLT",
+    "SPU_STATUS_ERROR_GET_IN_OUT_FILES_NAMES",
+    "SPU_STATUS_ERROR_READ_INPUT_FILE",
+    "SPU_STATUS_ERROR_IN_PROG",
+    "SPU_STATUS_ERROR_NULL_SPU_PTR",
+    "SPU_STATUS_ERROR_CONFIG_HAS_ERROR",
+    "SPU_STATUS_ERROR_MEM_ALLOC_ERROR",
+    "SPU_STATUS_ERROR_INP_FILE_HEADER_CORRUPTED",
+    "SPU_STATUS_ERROR_ZERO_BYTES_OF_CODE",
+    "SPU_STATUS_ERROR_HEADER_WRONG_SIGN",
+    "SPU_STATUS_ERROR_INPUT_FILE_WRONG_VERSION",
+    "SPU_STATUS_ERROR_INPUT_FILE_CODE_CORRUPTED",
+    "SPU_STATUS_ERROR_STACK",
+    "SPU_STATUS_ERROR_UNKNOWN_CMD"
 };
 
-enum SPUError
+enum SPUStatus
 {
-    SPU_ERROR_NO_ERROR                  = 0,
-    SPU_ERROR_GET_IN_OUT_FILES_NAMES    = 1,
-    SPU_ERROR_READ_INPUT_FILE           = 2,
-    SPU_ERROR_IN_PROG                   = 3,
-    SPU_ERROR_NULL_SPU_PTR              = 4,
-    SPU_ERROR_CONFIG_HAS_ERROR          = 5,
-    SPU_ERROR_MEM_ALLOC_ERROR           = 6,
-    SPU_ERROR_INP_FILE_HEADER_CORRUPTED = 7,
-    SPU_ERROR_ZERO_BYTES_OF_CODE        = 8,
-    SPU_ERROR_HEADER_WRONG_SIGN         = 9,
-    SPU_ERROR_INPUT_FILE_WRONG_VERSION  = 10,
-    SPU_ERROR_INPUT_FILE_CODE_CORRUPTED = 11,
-    SPU_ERROR_STACK_ERROR               = 12,
-};
-
-enum SPUExecCmdRes
-{
-    EXEC_CMD_RES_DEFAULT    = 0,
-    EXEC_CMD_RES_HLT        = 1,
+    SPU_STATUS_OK                               =  0,
+    SPU_STATUS_HLT                              =  1,
+    SPU_STATUS_ERROR_GET_IN_OUT_FILES_NAMES     =  2,
+    SPU_STATUS_ERROR_READ_INPUT_FILE            =  3,
+    SPU_STATUS_ERROR_IN_PROG                    =  4,
+    SPU_STATUS_ERROR_NULL_SPU_PTR               =  5,
+    SPU_STATUS_ERROR_CONFIG_HAS_ERROR           =  6,
+    SPU_STATUS_ERROR_MEM_ALLOC_ERROR            =  7,
+    SPU_STATUS_ERROR_INP_FILE_HEADER_CORRUPTED  =  8,
+    SPU_STATUS_ERROR_ZERO_BYTES_OF_CODE         =  9,
+    SPU_STATUS_ERROR_HEADER_WRONG_SIGN          = 10,
+    SPU_STATUS_ERROR_INPUT_FILE_WRONG_VERSION   = 11,
+    SPU_STATUS_ERROR_INPUT_FILE_CODE_CORRUPTED  = 12,
+    SPU_STATUS_ERROR_STACK                      = 13,
+    SPU_STATUS_ERROR_UNKNOWN_CMD                = 14,
 };
 
 struct SPU
@@ -89,9 +81,9 @@ static_assert(sizeof(spu_verification_messages)/sizeof(spu_verification_messages
 
 //-------------------------------------------------------------------------------------------------------------
 
-SPUError SPU_ctor(SPU* spu_ptr, Config cfg);
+SPUStatus SPU_ctor(SPU* spu_ptr, Config cfg);
 
-SPUError SPU_dtor(SPU* spu_ptr);
+SPUStatus SPU_dtor(SPU* spu_ptr);
 
 int SPU_verificator(SPU* spu_ptr);
 
@@ -112,15 +104,17 @@ void SPU_dump_( SPU* spu_ptr,
     }                                               \
 } while (0);                                        \
 
-void print_spu_error(SPUError err);
+void print_spu_error(SPUStatus err);
 
 #define PRINT_IF_SPU_ERROR_(err) do { if ((err)) { print_spu_error((err)); return (err); } } while(0)
 
 void print_spu_verify_res_(int verify_res);
 
-SPUError run_program(SPU *spu_ptr, int *prog_res);
+SPUStatus run_program(SPU *spu_ptr, int *prog_res);
 
-SPUExecCmdRes exec_command(Stack *stk_p, const char *line, Command cmd);
+//! @brief Executes command at which ip points to
+//! and moves ip.
+SPUStatus exec_curr_cmd_(SPU *spu_ptr, int *prog_res);
 
 //! @note BE VERY CAREFUL USING THIS! MAYBE NOT ALL STACK
 //! FUNCTIONS RETURN STACK_ERROR, ALSO BE AWARE THAT
@@ -128,7 +122,7 @@ SPUExecCmdRes exec_command(Stack *stk_p, const char *line, Command cmd);
 #define STACK_FUNC_WRAP(stack_func)                 \
 do{                                                 \
     StackErrorCode stk_err = (stack_func);          \
-    if ( (stk_err) ) return SPU_ERROR_STACK_ERROR;  \
+    if ( (stk_err) ) return SPU_STATUS_ERROR_STACK;  \
 }while(0)                                           \
 
 #endif /* SPU_H */

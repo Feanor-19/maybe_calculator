@@ -19,7 +19,7 @@ int main(int argc, const char *argv[])
     if (cfg.error)
     {
         print_cfg_error_message(stderr, cfg.error);
-        return SPU_ERROR_GET_IN_OUT_FILES_NAMES;
+        return SPU_STATUS_ERROR_GET_IN_OUT_FILES_NAMES;
     }
 
     print_config(stdout, cfg);
@@ -27,13 +27,14 @@ int main(int argc, const char *argv[])
     //----------------------
 
     SPU spu = {};
-    SPUError spu_err = SPU_ERROR_NO_ERROR;
+    SPUStatus spu_err = SPU_STATUS_OK;
 
     spu_err = SPU_ctor(&spu, cfg);
     PRINT_IF_SPU_ERROR_(spu_err);
 
-    SPU_DUMP(&spu, 0);
-
+    int prog_res = -1;
+    run_program(&spu, &prog_res);
+    printf("Result of the program: <%d>", prog_res);
 
     SPU_dtor(&spu);
 
@@ -41,25 +42,25 @@ int main(int argc, const char *argv[])
 }
 
 //! @brief Checks given header and writes size of code in bytes to *cs_size.
-inline SPUError check_header_(char *input_file_header, size_t *cs_size)
+inline SPUStatus check_header_(char *input_file_header, size_t *cs_size)
 {
     assert(input_file_header);
     assert(cs_size);
 
     if ( *((int *) input_file_header) != *((const int *) SIGN))
-        return SPU_ERROR_HEADER_WRONG_SIGN;
+        return SPU_STATUS_ERROR_HEADER_WRONG_SIGN;
 
     if ( *((int *) input_file_header + 1) != VERSION )
-        return SPU_ERROR_INPUT_FILE_WRONG_VERSION;
+        return SPU_STATUS_ERROR_INPUT_FILE_WRONG_VERSION;
 
     *cs_size = (size_t) *((int *) input_file_header + 2) - HEADER_SIZE_IN_BYTES;
 
-    return SPU_ERROR_NO_ERROR;
+    return SPU_STATUS_OK;
 }
 
 //! @brief Reads input file, checks it's header, allocates memory for asm prog and loads
 //! it into spu.
-inline SPUError load_prog_into_spu_(SPU *spu_ptr, const char *input_file_name)
+inline SPUStatus load_prog_into_spu_(SPU *spu_ptr, const char *input_file_name)
 {
     // НЕ SPU_CHECK, А ASSERT, ПОТОМУ ЧТО ЭТА ФУНКЦИЯ
     // ВЫЗЫВАЕТСЯ В КОНСТРУКТОРЕ, КОГДА SPU ЕЩЁ НЕ ГОТОВ
@@ -67,29 +68,29 @@ inline SPUError load_prog_into_spu_(SPU *spu_ptr, const char *input_file_name)
     assert(input_file_name);
 
     FILE * f_inp = fopen(input_file_name, "rb");
-    if (!f_inp) return SPU_ERROR_READ_INPUT_FILE;
+    if (!f_inp) return SPU_STATUS_ERROR_READ_INPUT_FILE;
 
     char *input_file_header = (char *) calloc( HEADER_SIZE_IN_BYTES, 1 );
     if (!input_file_header)
     {
         fclose(f_inp);
-        return SPU_ERROR_MEM_ALLOC_ERROR;
+        return SPU_STATUS_ERROR_MEM_ALLOC_ERROR;
     }
 
     if ( fread(input_file_header, 1, HEADER_SIZE_IN_BYTES, f_inp) != HEADER_SIZE_IN_BYTES )
     {
         fclose(f_inp);
         free(input_file_header);
-        return SPU_ERROR_INP_FILE_HEADER_CORRUPTED;
+        return SPU_STATUS_ERROR_INP_FILE_HEADER_CORRUPTED;
     }
 
     size_t cs_size = 0;
-    SPUError err = check_header_(input_file_header, &cs_size);
+    SPUStatus err = check_header_(input_file_header, &cs_size);
     if (cs_size == 0 || err)
     {
         fclose(f_inp);
         free(input_file_header);
-        if (cs_size == 0) return SPU_ERROR_ZERO_BYTES_OF_CODE;
+        if (cs_size == 0) return SPU_STATUS_ERROR_ZERO_BYTES_OF_CODE;
         if (err) return err;
     }
 
@@ -98,14 +99,14 @@ inline SPUError load_prog_into_spu_(SPU *spu_ptr, const char *input_file_name)
     {
         fclose(f_inp);
         free(input_file_header);
-        return SPU_ERROR_MEM_ALLOC_ERROR;
+        return SPU_STATUS_ERROR_MEM_ALLOC_ERROR;
     }
 
     if ( fread(cs_ptr, 1, cs_size, f_inp) != cs_size )
     {
         fclose(f_inp);
         free(input_file_header);
-        return SPU_ERROR_INP_FILE_HEADER_CORRUPTED;
+        return SPU_STATUS_ERROR_INP_FILE_HEADER_CORRUPTED;
     }
 
     fclose(f_inp);
@@ -113,13 +114,13 @@ inline SPUError load_prog_into_spu_(SPU *spu_ptr, const char *input_file_name)
     spu_ptr->cs = cs_ptr;
     spu_ptr->cs_size = cs_size;
 
-    return SPU_ERROR_NO_ERROR;
+    return SPU_STATUS_OK;
 }
 
-SPUError SPU_ctor(SPU* spu_ptr, Config cfg)
+SPUStatus SPU_ctor(SPU* spu_ptr, Config cfg)
 {
-    if (!spu_ptr) return SPU_ERROR_NULL_SPU_PTR;
-    if (cfg.error) return SPU_ERROR_CONFIG_HAS_ERROR;
+    if (!spu_ptr) return SPU_STATUS_ERROR_NULL_SPU_PTR;
+    if (cfg.error) return SPU_STATUS_ERROR_CONFIG_HAS_ERROR;
 
     STACK_FUNC_WRAP( stack_ctor(&(spu_ptr->stk)) );
 
@@ -128,15 +129,15 @@ SPUError SPU_ctor(SPU* spu_ptr, Config cfg)
         spu_ptr->registers[ind] = 0;
     }
 
-    SPUError err = load_prog_into_spu_(spu_ptr, cfg.input_file_name);
+    SPUStatus err = load_prog_into_spu_(spu_ptr, cfg.input_file_name);
     if (err) return err;
 
-    return SPU_ERROR_NO_ERROR;
+    return SPU_STATUS_OK;
 }
 
-SPUError SPU_dtor(SPU* spu_ptr)
+SPUStatus SPU_dtor(SPU* spu_ptr)
 {
-    if (!spu_ptr) return SPU_ERROR_NULL_SPU_PTR;
+    if (!spu_ptr) return SPU_STATUS_ERROR_NULL_SPU_PTR;
 
     STACK_FUNC_WRAP( stack_dtor( &(spu_ptr->stk) ) );
 
@@ -148,7 +149,7 @@ SPUError SPU_dtor(SPU* spu_ptr)
     if (spu_ptr->cs) free(spu_ptr->cs);
     spu_ptr->cs_size = (size_t) -1;
 
-    return SPU_ERROR_NO_ERROR;
+    return SPU_STATUS_OK;
 }
 
 int SPU_verificator(SPU* spu_ptr)
@@ -207,12 +208,20 @@ inline void print_header_bytes_(const char* sign,
 
     for (size_t ind = 0; ind < sizeof(int); ind++)
     {
-        fprintf(stderr, "%02X ", ( (char*) &version )[ind] );
+        fprintf(stderr, "%02X ", ( (const char*) &version )[ind] );
     }
 
     for (size_t ind = 0; ind < sizeof(int); ind++)
     {
-        fprintf(stderr, "%02X ", ( (char*) &binary_size_in_bytes )[ind] );
+        fprintf(stderr, "%02X ", ( (const char*) &binary_size_in_bytes )[ind] );
+    }
+}
+
+inline void put_n_chars(FILE *stream, size_t n, char c)
+{
+    while (n--)
+    {
+        putc(c, stream);
     }
 }
 
@@ -227,8 +236,11 @@ inline void print_spu_header_and_cs_(SPU *spu_ptr)
     const size_t row_width = 16;
 
     size_t rows_count = (spu_ptr->cs_size + HEADER_SIZE_IN_BYTES) / row_width + ( spu_ptr->cs_size % row_width != 0 );
+    size_t ind = 0;
     for (size_t row = 0; row < rows_count; row++ )
     {
+        const size_t col_of_ip_on_this_row_default_value = row_width + 1;
+        size_t col_of_ip_on_this_row = col_of_ip_on_this_row_default_value;
         for (size_t col = 0; col < row_width; col++)
         {
             if (row == 0 && col == 0)
@@ -237,12 +249,20 @@ inline void print_spu_header_and_cs_(SPU *spu_ptr)
                 col = HEADER_SIZE_IN_BYTES;
             }
 
-            // если вышли за границу массива то break!!!
-            if ( row*row_width + col - HEADER_SIZE_IN_BYTES >= spu_ptr->cs_size )
+            ind = row*row_width + col - HEADER_SIZE_IN_BYTES;
+
+            if ( ind >= spu_ptr->cs_size )
                 break;
 
-            fprintf(stderr, "%02X ",
-                    spu_ptr->cs[row*row_width + col - HEADER_SIZE_IN_BYTES]);
+            fprintf(stderr, "%02X ", (char) spu_ptr->cs[ind]);
+            if (ind == spu_ptr->ip)
+                col_of_ip_on_this_row = col;
+        }
+        putc('\n', stderr);
+        if (col_of_ip_on_this_row != col_of_ip_on_this_row_default_value)
+        {
+            put_n_chars(stderr, 3*col_of_ip_on_this_row, ' ');
+            putc('^', stderr);
         }
         putc('\n', stderr);
     }
@@ -261,6 +281,8 @@ void SPU_dump_( SPU* spu_ptr,
     print_spu_verify_res_( verify_res != 0 ? verify_res : SPU_verificator(spu_ptr) );
     print_spu_registers_(spu_ptr);
 
+    fprintf(stderr, "ip: <%llu>\n", spu_ptr->ip);
+
     if (spu_ptr->cs)
     {
         print_spu_header_and_cs_(spu_ptr);
@@ -273,80 +295,198 @@ void SPU_dump_( SPU* spu_ptr,
     fprintf(stderr, "====================== DUMP END ======================\n");
 }
 
-void print_spu_error(SPUError err)
+void print_spu_error(SPUStatus err)
 {
     assert(err);
-
-    fprintf(stderr, "SPU ERROR: <%s>\n", spu_error_messages[(int) err]);
+    fprintf(stderr, "SPU ERROR: <%s>\n", spu_status_messages[(int) err]);
 }
 
-// TODO CHANGE!
-inline void print_inprog_error(unsigned long line, const char *str)
-{
-    fprintf(stderr, "ERROR on line %ld! The line is:\n<%s>\n",
-                    line, str);
-}
-
-SPUError run_program(SPU *spu_ptr, int *prog_res)
+SPUStatus run_program(SPU *spu_ptr, int *prog_res)
 {
     SPU_CHECK(spu_ptr);
     assert(prog_res);
 
-
+    while (1) // типа процессор не остановится пока не встретит hlt
+    {
+        SPUStatus exec_res = exec_curr_cmd_(spu_ptr, prog_res);
+        if (exec_res != SPU_STATUS_OK && exec_res != SPU_STATUS_HLT)
+        {
+            print_spu_error(exec_res);
+            SPU_DUMP(spu_ptr, 0);
+            return exec_res;
+        }
+        else if ( exec_res == SPU_STATUS_HLT )
+            return SPU_STATUS_OK;
+    }
 }
 
-inline int get_arg(const char *line)
+inline SPUStatus exec_cmd_push(SPU *spu_ptr)
 {
-    assert(line);
+    SPU_CHECK(spu_ptr);
 
-    int x = 0;
-    sscanf(line, "%*s %s", &x);
+    if ( spu_ptr->cs[spu_ptr->ip] & bit_immediate_const )
+    {
+        spu_ptr->ip++;
+        int im_const = *((int *) (spu_ptr->cs + spu_ptr->ip));
+        STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, im_const) );
+        spu_ptr->ip += sizeof(int);
+    }
+    else if ( spu_ptr->cs[spu_ptr->ip] & bit_register )
+    {
+        spu_ptr->ip++;
+        char reg = spu_ptr->cs[spu_ptr->ip];
+        STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, spu_ptr->registers[(int) reg]) );
+        spu_ptr->ip += sizeof(char);
+    }
+    else
+    {
+        return SPU_STATUS_ERROR_UNKNOWN_CMD;
+    }
 
-    return x;
+    return SPU_STATUS_OK;
 }
 
-SPUExecCmdRes exec_command(Stack *stk_p, const char *line, Command cmd)
+inline SPUStatus exec_cmd_pop(SPU *spu_ptr)
 {
-    assert(line);
-    assert(cmd != CMD_UNKNOWN);
+    SPU_CHECK(spu_ptr);
 
-    /*
-    switch (cmd)
+    if ( spu_ptr->cs[spu_ptr->ip] & bit_immediate_const )
+    {
+        spu_ptr->ip++;
+        char reg = spu_ptr->cs[spu_ptr->ip];
+        STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &(spu_ptr->registers[(int) reg]) ) );
+        spu_ptr->ip += sizeof(char);
+    }
+    else
+    {
+        return SPU_STATUS_ERROR_UNKNOWN_CMD;
+    }
+
+    return SPU_STATUS_OK;
+}
+
+inline SPUStatus exec_cmd_add(SPU *spu_ptr)
+{
+    SPU_CHECK(spu_ptr);
+
+    int a = 0, b = 0;
+    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &b ) );
+    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &a ) );
+    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, a + b ) );
+
+    spu_ptr->ip++;
+
+    return SPU_STATUS_OK;
+}
+
+inline SPUStatus exec_cmd_sub(SPU *spu_ptr)
+{
+    SPU_CHECK(spu_ptr);
+
+    int a = 0, b = 0;
+    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &b ) );
+    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &a ) );
+    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, a - b ) );
+
+    spu_ptr->ip++;
+
+    return SPU_STATUS_OK;
+}
+
+inline SPUStatus exec_cmd_mul(SPU *spu_ptr)
+{
+    SPU_CHECK(spu_ptr);
+
+    int a = 0, b = 0;
+    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &b ) );
+    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &a ) );
+    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, a * b ) );
+
+    spu_ptr->ip++;
+
+    return SPU_STATUS_OK;
+}
+
+//TODO - Вычисления с фиксированной запятой!!!
+inline SPUStatus exec_cmd_div(SPU *spu_ptr)
+{
+    SPU_CHECK(spu_ptr);
+
+    int a = 0, b = 0;
+    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &b ) );
+    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &a ) );
+    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, a / b ) );
+
+    spu_ptr->ip++;
+
+    return SPU_STATUS_OK;
+}
+
+/*
+inline SPUStatus exec_cmd_in(SPU *spu_ptr)
+{
+    SPU_CHECK(spu_ptr);
+
+    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, prog_res ) );
+
+    spu_ptr->ip++;
+
+    return SPU_STATUS_OK;
+}
+*/
+
+inline SPUStatus exec_cmd_out(SPU *spu_ptr, int *prog_res)
+{
+    SPU_CHECK(spu_ptr);
+    assert(prog_res);
+
+    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, prog_res ) );
+
+    spu_ptr->ip++;
+
+    return SPU_STATUS_OK;
+}
+
+SPUStatus exec_curr_cmd_(SPU *spu_ptr, int *prog_res)
+{
+    SPU_CHECK(spu_ptr);
+    assert(prog_res);
+
+    switch ( spu_ptr->cs[spu_ptr->ip] & 31 )
     {
     case CMD_PUSH:
-        stack_push(stk_p, get_arg(line));
+        return exec_cmd_push(spu_ptr);
+        break;
+    case CMD_POP:
+        return exec_cmd_pop(spu_ptr);
         break;
     case CMD_ADD:
-        int pop1 = 0;
-        int pop2 = 0;
-
-        stack_pop(stk_p, &pop1);
-        stack_pop(stk_p, &pop2);
-
-        stack_push(stk_p, pop1 + pop2);
+        return exec_cmd_add(spu_ptr);
         break;
     case CMD_SUB:
-
+        return exec_cmd_sub(spu_ptr);
         break;
     case CMD_MUL:
-
+        return exec_cmd_mul(spu_ptr);
         break;
     case CMD_DIV:
-
+        return exec_cmd_div(spu_ptr);
         break;
     case CMD_IN:
-
+        //return exec_cmd_in(spu_ptr);
+        printf("IN IS NOT IMPLEMETED YET!!!\n");
+        return SPU_STATUS_HLT; // временно!!!
         break;
     case CMD_OUT:
-
+        return exec_cmd_out(spu_ptr, prog_res);
         break;
     case CMD_HLT:
-        return EXEC_CMD_RES_HLT;
+        return SPU_STATUS_HLT;
         break;
     default:
+        return SPU_STATUS_ERROR_UNKNOWN_CMD;
         break;
     }
-    */
 
-    return EXEC_CMD_RES_DEFAULT;
+    return SPU_STATUS_OK;
 }
