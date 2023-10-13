@@ -190,7 +190,7 @@ inline void print_spu_registers_(SPU *spu_ptr)
 {
     assert(spu_ptr);
 
-    fprintf(stderr, "SPU REGISTERS:");
+    fprintf(stderr, "SPU REGISTERS:\n");
     for (size_t ind = 0; ind < num_of_registers; ind++)
     {
         fprintf(stderr, "\t[%s] : <%d>\n", registers_names[ind], spu_ptr->registers[ind]);
@@ -350,7 +350,7 @@ inline SPUStatus exec_cmd_pop(SPU *spu_ptr)
 {
     SPU_CHECK(spu_ptr);
 
-    if ( spu_ptr->cs[spu_ptr->ip] & bit_immediate_const )
+    if ( spu_ptr->cs[spu_ptr->ip] & bit_register )
     {
         spu_ptr->ip++;
         char reg = spu_ptr->cs[spu_ptr->ip];
@@ -422,18 +422,24 @@ inline SPUStatus exec_cmd_div(SPU *spu_ptr)
     return SPU_STATUS_OK;
 }
 
-/*
+
 inline SPUStatus exec_cmd_in(SPU *spu_ptr)
 {
     SPU_CHECK(spu_ptr);
 
-    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, prog_res ) );
+    int in = 0;
+
+    fprintf(stdout, "Please enter 'in':\n");
+    if ( fscanf(stdin, "%d", &in) != 1 )
+        return SPU_STATUS_ERROR_WRONG_IN;
+
+    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, in ) );
 
     spu_ptr->ip++;
 
     return SPU_STATUS_OK;
 }
-*/
+
 
 inline SPUStatus exec_cmd_out(SPU *spu_ptr, int *prog_res)
 {
@@ -473,9 +479,7 @@ SPUStatus exec_curr_cmd_(SPU *spu_ptr, int *prog_res)
         return exec_cmd_div(spu_ptr);
         break;
     case CMD_IN:
-        //return exec_cmd_in(spu_ptr);
-        printf("IN IS NOT IMPLEMETED YET!!!\n");
-        return SPU_STATUS_HLT; // временно!!!
+        return exec_cmd_in(spu_ptr);
         break;
     case CMD_OUT:
         return exec_cmd_out(spu_ptr, prog_res);

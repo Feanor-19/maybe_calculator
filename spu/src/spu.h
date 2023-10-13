@@ -20,7 +20,8 @@ const char* spu_status_messages[] =
     "SPU_STATUS_ERROR_INPUT_FILE_WRONG_VERSION",
     "SPU_STATUS_ERROR_INPUT_FILE_CODE_CORRUPTED",
     "SPU_STATUS_ERROR_STACK",
-    "SPU_STATUS_ERROR_UNKNOWN_CMD"
+    "SPU_STATUS_ERROR_UNKNOWN_CMD",
+    "SPU_STATUS_ERROR_WRONG_IN"
 };
 
 enum SPUStatus
@@ -40,6 +41,7 @@ enum SPUStatus
     SPU_STATUS_ERROR_INPUT_FILE_CODE_CORRUPTED  = 12,
     SPU_STATUS_ERROR_STACK                      = 13,
     SPU_STATUS_ERROR_UNKNOWN_CMD                = 14,
+    SPU_STATUS_ERROR_WRONG_IN                   = 15,
 };
 
 struct SPU
