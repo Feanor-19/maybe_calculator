@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <ctype.h>
+#include <limits.h>
 
 #include "config_asm.h"
 
@@ -257,31 +258,7 @@ void print_asm_error_message(AssemblerError err)
 {
     assert(err);
 
-    switch (err)
-    {
-    case ASM_ERROR_GET_IN_OUT_FILES_NAMES:
-        fprintf(stderr, "ASSEMBLER ERROR: Can't get input and output files' names!\n");
-        break;
-    case ASM_ERROR_READ_INPUT_FILE:
-        fprintf(stderr, "ASSEMBLER ERROR: Can't read input file!\n");
-        break;
-    case ASM_ERROR_CANT_OPEN_OUTPUT_FILE:
-        fprintf(stderr, "ASSEMBLER ERROR: Can't open output file!\n");
-        break;
-    case ASM_ERROR_MEM_ALLOC:
-        fprintf(stderr, "ASSEMBLER ERROR: Can't allocate memory!\n");
-        break;
-    case ASM_ERROR_UNKOWN_COMMAND:
-        fprintf(stderr, "ASSEMBLER ERROR: Unknown command in the input file!\n");
-        break;
-    case ASM_ERROR_CMD_ARG:
-        fprintf(stderr, "ASSEMBLER ERROR: Invalid type of argument!\n");
-        break;
-    case ASM_ERROR_NO_ERROR:
-    default:
-        assert(0 && "Unreacheable default case in switch!");
-        break;
-    }
+    fprintf(stderr, "ASSEMBLER ERROR: <%s>!\n", assembler_error_messages[(int) err]);
 }
 
 CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
@@ -290,15 +267,21 @@ CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
 
     CmdArg cmd_arg = {};
 
-    int immediate_const = 0;
+    double immediate_const = 0;
     char rgstr[register_name_len] = "";
     int reg_id = 0;
 
     if      ( command_needs_im_const_arg[(int) cmd]
-            && sscanf(line + cmd_end, "%d", &immediate_const) == 1 )
+            && sscanf(line + cmd_end, "%lf", &immediate_const) == 1 )
     {
+        if ( (int) (immediate_const) >= INT_MAX / COMPUTATIONAL_MULTIPLIER )
+        {
+            cmd_arg.err = ASM_ERROR_CMD_ARG_TOO_BIG;
+            return cmd_arg;
+        }
+
         cmd_arg.cmd_byte = ((char) cmd) | bit_immediate_const;
-        cmd_arg.arg = (int) immediate_const;
+        cmd_arg.arg = (int) (immediate_const * COMPUTATIONAL_MULTIPLIER);
         cmd_arg.arg_size = immediate_const_size_in_bytes;
         cmd_arg.err = ASM_ERROR_NO_ERROR;
     }

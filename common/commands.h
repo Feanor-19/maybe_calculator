@@ -78,10 +78,12 @@ const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
 
 //--- BINARY FILE HEADER
 const char SIGN[4]  = {'S', 'F', '1', '9'};
-const int VERSION   = 4;
+const int VERSION   = 5;
 const size_t NUM_OF_BYTES_FOR_BIN_LEN = 4;
 const size_t HEADER_SIZE_IN_BYTES = sizeof(SIGN) + sizeof(VERSION) + NUM_OF_BYTES_FOR_BIN_LEN;
 //---
+
+const int COMPUTATIONAL_MULTIPLIER = 1000;
 
 const char *registers_names[] =
 {

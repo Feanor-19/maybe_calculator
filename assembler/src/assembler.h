@@ -13,6 +13,19 @@ enum AssemblerError
     ASM_ERROR_MEM_ALLOC                 = 4,
     ASM_ERROR_UNKOWN_COMMAND            = 5,
     ASM_ERROR_CMD_ARG                   = 6,
+    ASM_ERROR_CMD_ARG_TOO_BIG           = 7,
+};
+
+const char *assembler_error_messages[] =
+{
+    "ASM_ERROR_NO_ERROR",
+    "ASM_ERROR_GET_IN_OUT_FILES_NAMES",
+    "ASM_ERROR_READ_INPUT_FILE",
+    "ASM_ERROR_CANT_OPEN_OUTPUT_FILE",
+    "ASM_ERROR_MEM_ALLOC",
+    "ASM_ERROR_UNKOWN_COMMAND",
+    "ASM_ERROR_CMD_ARG",
+    "ASM_ERROR_CMD_ARG_TOO_BIG"
 };
 
 struct Input

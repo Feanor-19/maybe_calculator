@@ -1,0 +1,5 @@
+push 19.195
+push 42.23
+add
+out
+hlt

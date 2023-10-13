@@ -32,9 +32,9 @@ int main(int argc, const char *argv[])
     spu_err = SPU_ctor(&spu, cfg);
     PRINT_IF_SPU_ERROR_(spu_err);
 
-    int prog_res = -1;
+    double prog_res = -1;
     run_program(&spu, &prog_res);
-    printf("Result of the program: <%d>", prog_res);
+    printf("Result of the program: <%lf>", prog_res);
 
     SPU_dtor(&spu);
 
@@ -90,8 +90,8 @@ inline SPUStatus load_prog_into_spu_(SPU *spu_ptr, const char *input_file_name)
     {
         fclose(f_inp);
         free(input_file_header);
-        if (cs_size == 0) return SPU_STATUS_ERROR_ZERO_BYTES_OF_CODE;
         if (err) return err;
+        if (cs_size == 0) return SPU_STATUS_ERROR_ZERO_BYTES_OF_CODE;
     }
 
     char * cs_ptr = (char *) realloc(input_file_header, cs_size);
@@ -301,7 +301,7 @@ void print_spu_error(SPUStatus err)
     fprintf(stderr, "SPU ERROR: <%s>\n", spu_status_messages[(int) err]);
 }
 
-SPUStatus run_program(SPU *spu_ptr, int *prog_res)
+SPUStatus run_program(SPU *spu_ptr, double *prog_res)
 {
     SPU_CHECK(spu_ptr);
     assert(prog_res);
@@ -400,14 +400,13 @@ inline SPUStatus exec_cmd_mul(SPU *spu_ptr)
     int a = 0, b = 0;
     STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &b ) );
     STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &a ) );
-    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, a * b ) );
+    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, (a * b) / COMPUTATIONAL_MULTIPLIER ) );
 
     spu_ptr->ip++;
 
     return SPU_STATUS_OK;
 }
 
-//TODO - Вычисления с фиксированной запятой!!!
 inline SPUStatus exec_cmd_div(SPU *spu_ptr)
 {
     SPU_CHECK(spu_ptr);
@@ -415,7 +414,7 @@ inline SPUStatus exec_cmd_div(SPU *spu_ptr)
     int a = 0, b = 0;
     STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &b ) );
     STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &a ) );
-    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, a / b ) );
+    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, (a / b)*COMPUTATIONAL_MULTIPLIER ) );
 
     spu_ptr->ip++;
 
@@ -427,13 +426,13 @@ inline SPUStatus exec_cmd_in(SPU *spu_ptr)
 {
     SPU_CHECK(spu_ptr);
 
-    int in = 0;
+    double in = 0;
 
     fprintf(stdout, "Please enter 'in':\n");
-    if ( fscanf(stdin, "%d", &in) != 1 )
+    if ( fscanf(stdin, "%lf", &in) != 1 )
         return SPU_STATUS_ERROR_WRONG_IN;
 
-    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, in ) );
+    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, (int) (in * COMPUTATIONAL_MULTIPLIER) ) );
 
     spu_ptr->ip++;
 
@@ -441,19 +440,21 @@ inline SPUStatus exec_cmd_in(SPU *spu_ptr)
 }
 
 
-inline SPUStatus exec_cmd_out(SPU *spu_ptr, int *prog_res)
+inline SPUStatus exec_cmd_out(SPU *spu_ptr, double *prog_res)
 {
     SPU_CHECK(spu_ptr);
     assert(prog_res);
 
-    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, prog_res ) );
+    int buf = 0;
+    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &buf ) );
+    *prog_res = ( (double) buf ) / COMPUTATIONAL_MULTIPLIER;
 
     spu_ptr->ip++;
 
     return SPU_STATUS_OK;
 }
 
-SPUStatus exec_curr_cmd_(SPU *spu_ptr, int *prog_res)
+SPUStatus exec_curr_cmd_(SPU *spu_ptr, double *prog_res)
 {
     SPU_CHECK(spu_ptr);
     assert(prog_res);
