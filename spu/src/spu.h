@@ -2,7 +2,7 @@
 #define SPU_H
 
 #include "../../common/onegin.h"
-#include "../../common/commands.h"
+#include "../../common/common.h"
 
 const char* spu_status_messages[] =
 {
@@ -24,6 +24,7 @@ const char* spu_status_messages[] =
     "SPU_STATUS_ERROR_WRONG_IN"
 };
 
+// TODO - spu_status
 enum SPUStatus
 {
     SPU_STATUS_OK                               =  0,
@@ -34,11 +35,13 @@ enum SPUStatus
     SPU_STATUS_ERROR_NULL_SPU_PTR               =  5,
     SPU_STATUS_ERROR_CONFIG_HAS_ERROR           =  6,
     SPU_STATUS_ERROR_MEM_ALLOC_ERROR            =  7,
+   // SPU_STATUS_WARNING
     SPU_STATUS_ERROR_INP_FILE_HEADER_CORRUPTED  =  8,
     SPU_STATUS_ERROR_ZERO_BYTES_OF_CODE         =  9,
     SPU_STATUS_ERROR_HEADER_WRONG_SIGN          = 10,
     SPU_STATUS_ERROR_INPUT_FILE_WRONG_VERSION   = 11,
     SPU_STATUS_ERROR_INPUT_FILE_CODE_CORRUPTED  = 12,
+    // SPU_STATUS_FATAL
     SPU_STATUS_ERROR_STACK                      = 13,
     SPU_STATUS_ERROR_UNKNOWN_CMD                = 14,
     SPU_STATUS_ERROR_WRONG_IN                   = 15,
@@ -124,7 +127,7 @@ SPUStatus exec_curr_cmd_(SPU *spu_ptr, double *prog_res);
 #define STACK_FUNC_WRAP(stack_func)                 \
 do{                                                 \
     StackErrorCode stk_err = (stack_func);          \
-    if ( (stk_err) ) return SPU_STATUS_ERROR_STACK;  \
+    if ( (stk_err) ) return SPU_STATUS_ERROR_STACK; \
 }while(0)                                           \
 
 #endif /* SPU_H */

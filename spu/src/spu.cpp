@@ -324,14 +324,14 @@ inline SPUStatus exec_cmd_push(SPU *spu_ptr)
 {
     SPU_CHECK(spu_ptr);
 
-    if ( spu_ptr->cs[spu_ptr->ip] & bit_immediate_const )
+    if ( spu_ptr->cs[spu_ptr->ip] & BIT_IMMEDIATE_CONST )
     {
         spu_ptr->ip++;
         int im_const = *((int *) (spu_ptr->cs + spu_ptr->ip));
         STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, im_const) );
         spu_ptr->ip += sizeof(int);
     }
-    else if ( spu_ptr->cs[spu_ptr->ip] & bit_register )
+    else if ( spu_ptr->cs[spu_ptr->ip] & BIT_REGISTER )
     {
         spu_ptr->ip++;
         char reg = spu_ptr->cs[spu_ptr->ip];
@@ -350,7 +350,7 @@ inline SPUStatus exec_cmd_pop(SPU *spu_ptr)
 {
     SPU_CHECK(spu_ptr);
 
-    if ( spu_ptr->cs[spu_ptr->ip] & bit_register )
+    if ( spu_ptr->cs[spu_ptr->ip] & BIT_REGISTER )
     {
         spu_ptr->ip++;
         char reg = spu_ptr->cs[spu_ptr->ip];

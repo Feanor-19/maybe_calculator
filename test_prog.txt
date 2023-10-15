@@ -1,0 +1,13 @@
+; some header information
+
+in
+in ; some comment
+add
+pop rax
+
+push rax
+push rax
+mul
+out
+pop rbx
+hlt

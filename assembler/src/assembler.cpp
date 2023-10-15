@@ -3,6 +3,8 @@
 #include <limits.h>
 
 #include "config_asm.h"
+#include "..\..\common\utils.h"
+#include "..\..\common\mystring.h"
 
 #include "assembler.h"
 
@@ -24,17 +26,6 @@ int main(int argc, const char *argv[])
 
     BinOut bin_out = translate_to_binary(input);
     CHECK_ERR_(bin_out.err);
-
-    //---
-    /*
-    printf("bin:\n");
-    for (size_t ind = 0; ind < bin_out.bin_arr_len; ind++)
-    {
-        printf("%d ", bin_out.bin_arr[ind]);
-    }
-    printf("\n");
-    */
-    //---
 
     AssemblerError err = write_bin_to_output(bin_out, cfg.output_file_name);
     CHECK_ERR_(err);
@@ -108,11 +99,20 @@ inline void print_translation_error(unsigned long line, const char *str)
 
 //! @brief Writes to the beginning of bin_arr the header, formed from constants in
 //! assembler.h
-inline void write_header_to_bin(char * bin_arr, size_t bin_final_len)
+inline void write_header_to_bin(int8_t * bin_arr, size_t bin_final_len)
 {
-    *((int *) bin_arr) = *((const int *) SIGN);
-    *((int *) bin_arr + 1) = VERSION;
-    *((int *) bin_arr + 2) = (int) bin_final_len;
+    *((BIN_HEADER_SIGN_t *) bin_arr) = SIGN;
+    bin_arr += sizeof(BIN_HEADER_SIGN_t);
+
+    *((BIN_HEADER_VERSION_t *) bin_arr) = VERSION;
+    bin_arr += sizeof(BIN_HEADER_VERSION_t);
+
+    *((BIN_HEADER_FILE_SIZE_t *) bin_arr) = (BIN_HEADER_FILE_SIZE_t) bin_final_len;
+}
+
+inline int can_cmd_have_arg(Command cmd)
+{
+    return command_needs_im_const_arg[(int) cmd] || command_needs_register_arg[(int) cmd];
 }
 
 BinOut translate_to_binary(Input input)
@@ -124,7 +124,8 @@ BinOut translate_to_binary(Input input)
     // Примечание: считается, что всегда численное значение команды короче, чем ее словесное обозначение
     // (по количеству символов), а потому нам достаточно для транслированного текста того количества байтов,
     // которое было в изначальном
-    char *bin_arr = (char *) calloc(input.file_buf.buf_size + HEADER_SIZE_IN_BYTES, sizeof(char));
+    const size_t START_BIN_ARR_SIZE = input.file_buf.buf_size + HEADER_SIZE_IN_BYTES;
+    int8_t *bin_arr = (int8_t *) calloc(START_BIN_ARR_SIZE, sizeof(char));
     if (!bin_arr)
     {
         bin_out.err = ASM_ERROR_MEM_ALLOC;
@@ -134,44 +135,36 @@ BinOut translate_to_binary(Input input)
 
     for (unsigned long ind = 0; ind < input.text.nLines; ind++)
     {
-        if ( input.text.line_array[ind][0] == '\0' ) continue;
+        if ( is_str_empty(input.text.line_array[ind]) ) continue;
 
         size_t cmd_end = 0;
         Command cmd = get_command(input.text.line_array[ind], &cmd_end);
         if (cmd == CMD_UNKNOWN)
         {
             print_translation_error(ind + 1, input.text.line_array[ind]);
-            free(bin_arr); // ???
+            free(bin_arr);
             bin_out.err = ASM_ERROR_UNKOWN_COMMAND;
             return bin_out;
         }
 
-        bin_arr[bin_arr_ind] = (char) cmd;
+        bin_arr[bin_arr_ind++] = (int8_t) cmd;
 
-        if (command_needs_arg[cmd])
+        if ( can_cmd_have_arg(cmd) )
         {
-            CmdArg cmd_arg = get_arg(cmd, input.text.line_array[ind], cmd_end);
+            CmdArg cmd_arg = get_arg(cmd, input.text.line_array[ind] + cmd_end);
             if (cmd_arg.err)
             {
                 bin_out.err = cmd_arg.err;
                 return bin_out;
             }
 
-            // перезаписываем тот же байт в bin_arr
-            bin_arr[bin_arr_ind++] = cmd_arg.cmd_byte;
-
-            if (cmd_arg.arg_size == 1)
+            bin_arr[bin_arr_ind++] = cmd_arg.info_byte;
+            if ( test_bit(cmd_arg.info_byte, BIT_IMMEDIATE_CONST) )
             {
-                bin_arr[bin_arr_ind] = (char) cmd_arg.arg;
-            }
-            else if (cmd_arg.arg_size == 4)
-            {
-                *((int *) (bin_arr + bin_arr_ind)) = (int) cmd_arg.arg;
-                bin_arr_ind += 3; // тк после будет еще один bin_arr_ind
+                *((immediate_const_t *) bin_arr) = cmd_arg.im_const;
+                bin_arr_ind += sizeof(immediate_const_t);
             }
         }
-
-        bin_arr_ind++;
     }
 
     write_header_to_bin(bin_arr, bin_arr_ind);
@@ -188,7 +181,7 @@ AssemblerError write_bin_to_output(BinOut bin_out, const char *output_file_name)
     FILE* out = fopen(output_file_name, "w");
     if (!out)
     {
-        fclose(out); // ???
+        fclose(out);
         return ASM_ERROR_CANT_OPEN_OUTPUT_FILE;
     }
 
@@ -199,15 +192,45 @@ AssemblerError write_bin_to_output(BinOut bin_out, const char *output_file_name)
     return ASM_ERROR_NO_ERROR;
 }
 
-Command get_command(const char *str, size_t *cmd_end_ptr)
+inline size_t find_cmd_end( const char *str)
+{
+    char *cmd_end_char_ptr = strchr(str, ' ');
+    if ( !cmd_end_char_ptr )
+        return strchr(str, '\0') - str;
+    else
+        return cmd_end_char_ptr - str;
+}
+
+Command get_command(char *str, size_t *cmd_end_ptr)
 {
     assert(str);
     assert(cmd_end_ptr);
 
+    *cmd_end_ptr = find_cmd_end(str);
+    int space_was_changed_to_zero = 0;
+    if ( str[*cmd_end_ptr] == ' ' )
+    {
+        str[*cmd_end_ptr] = '\0';
+        space_was_changed_to_zero = 1;
+    }
+
     for (size_t cmd_ind = 1; cmd_ind < commands_list_len; cmd_ind++)
     {
-        size_t str_ind = 0;
+        // данная версия использует функции из стандартной библиотеки, а потому
+        // более понятна и читаема, но делает несколько проходов по строчке
+        if ( strcmp(str, commands_list[cmd_ind] ) == 0 )
+        {
+            if ( space_was_changed_to_zero )
+                str[*cmd_end_ptr] = ' ';
 
+            return (Command) cmd_ind;
+        }
+
+        /* ???????????????????????????????????????????????????????????????????????????????????????
+        // данная версия не делает лишнего прохода (который сейчас вынесен вне этой функции),
+        // но по идее гораздо хуже понятно,
+        // чем же она все таки занимается, особенно учитывая нетривиальность самого кода
+        size_t str_ind = 0;
         while(1)
         {
             if ( str[str_ind] == commands_list[cmd_ind][str_ind] )
@@ -235,6 +258,7 @@ Command get_command(const char *str, size_t *cmd_end_ptr)
                 }
             }
         }
+        */
     }
 
     return CMD_UNKNOWN;
@@ -254,43 +278,44 @@ inline int check_reg_name(const char *rgstr)
     return -1;
 }
 
-void print_asm_error_message(AssemblerError err)
+inline uint8_t write_reg_to_info_byte( uint8_t info_byte, int reg_id )
 {
-    assert(err);
-
-    fprintf(stderr, "ASSEMBLER ERROR: <%s>!\n", assembler_error_messages[(int) err]);
+    for ( uint8_t bit = BIT_REG_ID_START; bit <= BIT_REG_ID_END; bit++ )
+    {
+        if ( test_bit((uint8_t) reg_id, bit - BIT_REG_ID_START) )
+            info_byte = set_bit( info_byte, bit );
+    }
+    return info_byte;
 }
 
-CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
+CmdArg get_arg(Command cmd, const char *arg)
 {
-    assert(line);
+    assert(arg);
 
     CmdArg cmd_arg = {};
 
-    double immediate_const = 0;
-    char rgstr[register_name_len] = "";
+    double immediate_const_raw = 0;
+    char rgstr[register_name_len + 1] = "";
     int reg_id = 0;
 
     if      ( command_needs_im_const_arg[(int) cmd]
-            && sscanf(line + cmd_end, "%lf", &immediate_const) == 1 )
+            && sscanf(arg, "%lf", &immediate_const_raw) == 1 )
     {
-        if ( (int) (immediate_const) >= INT_MAX / COMPUTATIONAL_MULTIPLIER )
+        if ( (int) (immediate_const_raw) >= INT_MAX / COMPUTATIONAL_MULTIPLIER )
         {
             cmd_arg.err = ASM_ERROR_CMD_ARG_TOO_BIG;
             return cmd_arg;
         }
 
-        cmd_arg.cmd_byte = ((char) cmd) | bit_immediate_const;
-        cmd_arg.arg = (int) (immediate_const * COMPUTATIONAL_MULTIPLIER);
-        cmd_arg.arg_size = immediate_const_size_in_bytes;
+        cmd_arg.info_byte = set_bit( cmd_arg.info_byte, BIT_IMMEDIATE_CONST );
+        cmd_arg.im_const = (immediate_const_t) (immediate_const_raw * COMPUTATIONAL_MULTIPLIER);
         cmd_arg.err = ASM_ERROR_NO_ERROR;
     }
     else if ( command_needs_register_arg[(int) cmd]
-            && sscanf(line + cmd_end, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) != -1 )
+            && sscanf(arg, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) != -1 )
     {
-        cmd_arg.cmd_byte = ((char) cmd) | bit_register;
-        cmd_arg.arg = (char) reg_id;
-        cmd_arg.arg_size = register_id_size_in_bytes;
+        cmd_arg.info_byte = set_bit( cmd_arg.info_byte, BIT_REGISTER ) ;
+        cmd_arg.info_byte = write_reg_to_info_byte( cmd_arg.info_byte, reg_id );
         cmd_arg.err = ASM_ERROR_NO_ERROR;
     }
     else
@@ -299,6 +324,13 @@ CmdArg get_arg(Command cmd, const char *line, size_t cmd_end)
     }
 
     return cmd_arg;
+}
+
+void print_asm_error_message(AssemblerError err)
+{
+    assert(err);
+
+    fprintf(stderr, "ASSEMBLER ERROR: <%s>!\n", assembler_error_messages[(int) err]);
 }
 
 void free_struct_input(Input input)

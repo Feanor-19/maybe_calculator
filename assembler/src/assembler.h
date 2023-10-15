@@ -2,7 +2,9 @@
 #define ASSEMBLER_H
 
 #include "../../common/onegin.h"
-#include "../../common/commands.h"
+#include "../../common/common.h"
+
+#include <stdint.h>
 
 enum AssemblerError
 {
@@ -37,17 +39,16 @@ struct Input
 
 struct BinOut
 {
-    char *bin_arr;      //< Array of bytes - machine code.
+    int8_t *bin_arr;    //< Array of bytes - machine code.
     size_t bin_arr_len; //< Length of non-empty part of arr.
     AssemblerError err; //< Holds current error state.
 };
 
 struct CmdArg
 {
-    char cmd_byte;      //< 5 younger bits contain command, 3 older - type of arg
-    int arg;
-    size_t arg_size;    //< Number of bytes in arg which are actual informaton (arg_size <= sizeof(int))
-    AssemblerError err; //< //< Holds current error state.
+    immediate_const_t im_const;     //< Is used if needed.
+    int8_t info_byte;               //< See common.h ("Структура байта с информацией") for details.
+    AssemblerError err;             //< Holds current error state.
 };
 
 //-------------------------------------------------------------------------------------------------------------
@@ -79,9 +80,9 @@ AssemblerError write_bin_to_output(BinOut bin_out, const char *output_file_name)
 //! @param [in] string String to parse.
 //! @param [out] cmd_end_ptr Pointer to size_t variable.
 //! @return Element of enum Command.
-Command get_command(const char *str, size_t *cmd_end_ptr);
+Command get_command(char *str, size_t *cmd_end_ptr);
 
-CmdArg get_arg(Command cmd, const char *line, size_t cmd_end);
+CmdArg get_arg(Command cmd, const char *arg);
 
 void print_asm_error_message(AssemblerError err);
 
