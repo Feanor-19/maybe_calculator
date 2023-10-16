@@ -47,13 +47,17 @@ inline SPUStatus check_header_(char *input_file_header, size_t *cs_size)
     assert(input_file_header);
     assert(cs_size);
 
-    if ( *((int *) input_file_header) != *((const int *) SIGN))
+    if ( *((BIN_HEADER_SIGN_t *) input_file_header) != SIGN)
         return SPU_STATUS_ERROR_HEADER_WRONG_SIGN;
 
-    if ( *((int *) input_file_header + 1) != VERSION )
+    input_file_header += sizeof(BIN_HEADER_SIGN_t);
+
+    if ( *((BIN_HEADER_VERSION_t *) input_file_header) != VERSION )
         return SPU_STATUS_ERROR_INPUT_FILE_WRONG_VERSION;
 
-    *cs_size = (size_t) *((int *) input_file_header + 2) - HEADER_SIZE_IN_BYTES;
+    input_file_header += sizeof(BIN_HEADER_VERSION_t);
+
+    *cs_size = (size_t) *((BIN_HEADER_FILE_SIZE_t *) input_file_header) - HEADER_SIZE_IN_BYTES;
 
     return SPU_STATUS_OK;
 }
@@ -197,21 +201,21 @@ inline void print_spu_registers_(SPU *spu_ptr)
     }
 }
 
-inline void print_header_bytes_(const char* sign,
-                                const int version,
-                                const size_t binary_size_in_bytes)
+inline void print_header_bytes_(const BIN_HEADER_SIGN_t sign,
+                                const BIN_HEADER_VERSION_t version,
+                                const BIN_HEADER_FILE_SIZE_t binary_size_in_bytes)
 {
-    for (size_t ind = 0; ind < sizeof(int); ind++)
+    for (size_t ind = 0; ind < sizeof(BIN_HEADER_SIGN_t); ind++)
     {
-        fprintf(stderr, "%02X ", sign[ind] );
+        fprintf(stderr, "%02X ", ( (const char*) &sign )[ind] );
     }
 
-    for (size_t ind = 0; ind < sizeof(int); ind++)
+    for (size_t ind = 0; ind < sizeof(BIN_HEADER_VERSION_t); ind++)
     {
         fprintf(stderr, "%02X ", ( (const char*) &version )[ind] );
     }
 
-    for (size_t ind = 0; ind < sizeof(int); ind++)
+    for (size_t ind = 0; ind < sizeof(BIN_HEADER_FILE_SIZE_t); ind++)
     {
         fprintf(stderr, "%02X ", ( (const char*) &binary_size_in_bytes )[ind] );
     }

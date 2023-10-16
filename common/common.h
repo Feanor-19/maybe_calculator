@@ -51,64 +51,36 @@ const uint8_t BIT_MEMORY            = 2;
 const uint8_t BIT_REG_ID_START      = 3; //< Register id starts on this bit
 const uint8_t BIT_REG_ID_END        = 5; //< Register id ends on this bit
 
+#define DEF_CMD(name, id, is_im_const, is_reg, is_mem, ...) CMD_##name = id,
 enum Command
 {
-    CMD_UNKNOWN = 0,
-    CMD_PUSH    = 1,
-    CMD_POP     = 2,
-    CMD_ADD     = 3,
-    CMD_SUB     = 4,
-    CMD_MUL     = 5,
-    CMD_DIV     = 6,
-    CMD_IN      = 7,
-    CMD_OUT     = 8,
-    CMD_HLT     = 9,
+    #include "commands.h"
 };
+#undef DEF_CMD
 
-//! @note MUST BE IN SYNC WITH ENUM COMMANDS!
+#define DEF_CMD(name, id, is_im_const, is_reg, is_mem, ...) #name,
 const char *commands_list[] =
 {
-    "",     //CMD_UNKNOWN
-    "push", //CMD_PUSH
-    "pop",  //CMD_POP
-    "add",  //CMD_ADD
-    "sub",  //CMD_SUB
-    "mul",  //CMD_MUL
-    "div",  //CMD_DIV
-    "in",   //CMD_IN
-    "out",  //CMD_OUT
-    "hlt"   //CMD_HLT
+    #include "commands.h"
+    "FICTIONAL_CMD!"
 };
+#undef DEF_CMD
 
-//! @note MUST BE IN SYNC WITH ENUM COMMANDS!
+#define DEF_CMD(name, id, is_im_const, is_reg, is_mem, ...) is_im_const,
 const int command_needs_im_const_arg[] =
 {
-    0,  //CMD_UNKNOWN
-    1,  //CMD_PUSH
-    0,  //CMD_POP
-    0,  //CMD_ADD
-    0,  //CMD_SUB
-    0,  //CMD_MUL
-    0,  //CMD_DIV
-    0,  //CMD_IN
-    0,  //CMD_OUT
-    0   //CMD_HLT
+    #include "commands.h"
+    0 // FICTIONAL_CMD!
 };
+#undef DEF_CMD
 
-//! @note MUST BE IN SYNC WITH ENUM COMMANDS!
+#define DEF_CMD(name, id, is_im_const, is_reg, is_mem, ...) is_reg,
 const int command_needs_register_arg[] =
 {
-    0,  //CMD_UNKNOWN
-    1,  //CMD_PUSH
-    1,  //CMD_POP
-    0,  //CMD_ADD
-    0,  //CMD_SUB
-    0,  //CMD_MUL
-    0,  //CMD_DIV
-    0,  //CMD_IN
-    0,  //CMD_OUT
-    0   //CMD_HLT
+    #include "commands.h"
+    0 // FICTIONAL_CMD!
 };
+#undef DEF_CMD
 
 const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
 
@@ -116,7 +88,7 @@ const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
 const static char SIGN_RAW_[4] = {'S', 'F', '1', '9'};
 const BIN_HEADER_SIGN_t SIGN = *((const BIN_HEADER_SIGN_t*) SIGN_RAW_);
 const BIN_HEADER_VERSION_t VERSION   = 6;
-const size_t HEADER_SIZE_IN_BYTES = sizeof(SIGN) + sizeof(VERSION) + sizeof(BIN_HEADER_FILE_SIZE_t);
+const size_t HEADER_SIZE_IN_BYTES = sizeof(BIN_HEADER_SIGN_t) + sizeof(BIN_HEADER_VERSION_t) + sizeof(BIN_HEADER_FILE_SIZE_t);
 //---
 
 const spu_stack_elem_t COMPUTATIONAL_MULTIPLIER = 1000;
@@ -136,9 +108,9 @@ const size_t num_of_registers = sizeof(registers_names)/sizeof(registers_names[0
 #define sizearr(arr) sizeof(arr)/sizeof(arr[0])
 
 static_assert(sizearr(command_needs_im_const_arg) == sizearr(command_needs_register_arg),
-                "command_needs_im_const_arg's and command_needs_register_arg's sizes are snot equal!");
+                "command_needs_im_const_arg's and command_needs_register_arg's sizes are not equal!");
 
-static_assert(sizeof(SIGN) == sizeof(int), "SIGN must be as long as int is!");
+static_assert(sizeof(SIGN_RAW_) == sizeof(BIN_HEADER_SIGN_t), "SIGN must be as long as int is!");
 
 #undef sizearr
 

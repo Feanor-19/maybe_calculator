@@ -72,13 +72,13 @@ inline void preprocess_input_handle_comments_(Input input)
     }
 }
 
-inline void preprocess_input_tolower(Input input)
+inline void preprocess_input_toupper(Input input)
 {
     ASSERT_INPUT_(input);
 
     for (size_t ind = 0; ind < input.file_buf.buf_size; ind++)
     {
-        input.file_buf.buf[ind] = (char) tolower(input.file_buf.buf[ind]);
+        input.file_buf.buf[ind] = (char) toupper(input.file_buf.buf[ind]);
     }
 }
 
@@ -88,7 +88,7 @@ void preprocess_input(Input input)
 
     preprocess_input_handle_comments_(input);
 
-    preprocess_input_tolower(input);
+    preprocess_input_toupper(input);
 }
 
 inline void print_translation_error(unsigned long line, const char *str)
