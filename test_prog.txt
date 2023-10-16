@@ -11,3 +11,4 @@ mul
 out
 pop rbx
 hlt
+push 19

@@ -37,6 +37,7 @@
 */
 
 typedef int spu_stack_elem_t;
+//TODO - добавить prog_res_t = double
 
 typedef int32_t immediate_const_t;
 
@@ -93,13 +94,14 @@ const size_t HEADER_SIZE_IN_BYTES = sizeof(BIN_HEADER_SIGN_t) + sizeof(BIN_HEADE
 
 const spu_stack_elem_t COMPUTATIONAL_MULTIPLIER = 1000;
 
+//! @note REGISTER'S NAMES MUST BE ONLU UPPERCASE!
 const size_t register_name_len = 3;
 const char registers_names[][register_name_len + 1] =
 {
-    "rax",
-    "rbx",
-    "rcx",
-    "rdx"
+    "RAX",
+    "RBX",
+    "RCX",
+    "RDX"
 };
 
 const size_t num_of_registers = sizeof(registers_names)/sizeof(registers_names[0]);

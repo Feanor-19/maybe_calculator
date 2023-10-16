@@ -5,6 +5,7 @@
 
 #include "../../common/onegin.h"
 #include "../../common/common.h"
+#include "../../common/utils.h"
 
 const char* spu_status_messages[] =
 {
@@ -26,7 +27,8 @@ const char* spu_status_messages[] =
     "SPU_STATUS_ERROR_WRONG_IN"
 };
 
-// TODO - spu_status
+// TODO - добавить SPU_STATUS_WARNING и SPU_STATUS_FATAL
+// для определения критичности ошибки
 enum SPUStatus
 {
     SPU_STATUS_OK                               =  0,
@@ -47,6 +49,7 @@ enum SPUStatus
     SPU_STATUS_ERROR_STACK                      = 13,
     SPU_STATUS_ERROR_UNKNOWN_CMD                = 14,
     SPU_STATUS_ERROR_WRONG_IN                   = 15,
+    SPU_STATUS_ERROR_DIV_BY_ZERO                = 16,
 };
 
 struct SPU

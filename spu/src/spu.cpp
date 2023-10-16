@@ -458,40 +458,19 @@ inline SPUStatus exec_cmd_out(SPU *spu_ptr, double *prog_res)
     return SPU_STATUS_OK;
 }
 
+#define DEF_CMD(name, id, is_im_const, is_reg, is_mem, ...)     \
+    case CMD_##name:                                            \
+        __VA_ARGS__                                             \
+        break;
+
 SPUStatus exec_curr_cmd_(SPU *spu_ptr, double *prog_res)
 {
     SPU_CHECK(spu_ptr);
     assert(prog_res);
 
-    switch ( spu_ptr->cs[spu_ptr->ip] & 31 )
+    switch ( spu_ptr->cs[spu_ptr->ip] )
     {
-    case CMD_PUSH:
-        return exec_cmd_push(spu_ptr);
-        break;
-    case CMD_POP:
-        return exec_cmd_pop(spu_ptr);
-        break;
-    case CMD_ADD:
-        return exec_cmd_add(spu_ptr);
-        break;
-    case CMD_SUB:
-        return exec_cmd_sub(spu_ptr);
-        break;
-    case CMD_MUL:
-        return exec_cmd_mul(spu_ptr);
-        break;
-    case CMD_DIV:
-        return exec_cmd_div(spu_ptr);
-        break;
-    case CMD_IN:
-        return exec_cmd_in(spu_ptr);
-        break;
-    case CMD_OUT:
-        return exec_cmd_out(spu_ptr, prog_res);
-        break;
-    case CMD_HLT:
-        return SPU_STATUS_HLT;
-        break;
+    #include "../../common/commands.h"
     default:
         return SPU_STATUS_ERROR_UNKNOWN_CMD;
         break;
@@ -499,3 +478,4 @@ SPUStatus exec_curr_cmd_(SPU *spu_ptr, double *prog_res)
 
     return SPU_STATUS_OK;
 }
+#undef DEF_CMD

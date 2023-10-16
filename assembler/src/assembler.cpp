@@ -161,7 +161,7 @@ BinOut translate_to_binary(Input input)
             bin_arr[bin_arr_ind++] = cmd_arg.info_byte;
             if ( test_bit(cmd_arg.info_byte, BIT_IMMEDIATE_CONST) )
             {
-                *((immediate_const_t *) bin_arr) = cmd_arg.im_const;
+                *((immediate_const_t *) (bin_arr + bin_arr_ind)) = cmd_arg.im_const;
                 bin_arr_ind += sizeof(immediate_const_t);
             }
         }
@@ -178,7 +178,7 @@ BinOut translate_to_binary(Input input)
 
 AssemblerError write_bin_to_output(BinOut bin_out, const char *output_file_name)
 {
-    FILE* out = fopen(output_file_name, "w");
+    FILE* out = fopen(output_file_name, "wb");
     if (!out)
     {
         fclose(out);
@@ -225,40 +225,6 @@ Command get_command(char *str, size_t *cmd_end_ptr)
 
             return (Command) cmd_ind;
         }
-
-        /* ???????????????????????????????????????????????????????????????????????????????????????
-        // данная версия не делает лишнего прохода (который сейчас вынесен вне этой функции),
-        // но по идее гораздо хуже понятно,
-        // чем же она все таки занимается, особенно учитывая нетривиальность самого кода
-        size_t str_ind = 0;
-        while(1)
-        {
-            if ( str[str_ind] == commands_list[cmd_ind][str_ind] )
-            {
-                if ( str[str_ind] == '\0' )
-                {
-                    *cmd_end_ptr = str_ind;
-                    return (Command) cmd_ind;
-                }
-                else
-                {
-                    str_ind++;
-                }
-            }
-            else
-            {
-                if( str[str_ind] == ' ' && commands_list[cmd_ind][str_ind] == '\0' )
-                {
-                    *cmd_end_ptr = str_ind;
-                    return (Command) cmd_ind;
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-        */
     }
 
     return CMD_UNKNOWN;
