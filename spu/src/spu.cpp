@@ -235,7 +235,7 @@ inline void print_spu_header_and_cs_(SPU *spu_ptr)
 
     fprintf(stderr, "HEADER + CODE SEGMENT:\n{\n");
 
-    print_header_bytes_(SIGN, VERSION, spu_ptr->cs_size + HEADER_SIZE_IN_BYTES);
+    print_header_bytes_(SIGN, VERSION, (BIN_HEADER_FILE_SIZE_t) spu_ptr->cs_size + HEADER_SIZE_IN_BYTES);
 
     const size_t row_width = 16;
 
@@ -324,6 +324,7 @@ SPUStatus run_program(SPU *spu_ptr, double *prog_res)
     }
 }
 
+/*
 inline SPUStatus exec_cmd_push(SPU *spu_ptr)
 {
     SPU_CHECK(spu_ptr);
@@ -457,8 +458,7 @@ inline SPUStatus exec_cmd_out(SPU *spu_ptr, double *prog_res)
 
     return SPU_STATUS_OK;
 }
-
-inline
+*/
 
 #define DEF_CMD(name, id, is_im_const, is_reg, is_mem, ...)     \
     case CMD_##name:                                            \
@@ -469,6 +469,11 @@ SPUStatus exec_curr_cmd_(SPU *spu_ptr, double *prog_res)
 {
     SPU_CHECK(spu_ptr);
     assert(prog_res);
+
+    //TODO - обернуть вот эту прикольную штуку как пошаговое выполнение, включаемое флагом
+    SPU_DUMP(spu_ptr, 0);
+    printf("Press enter to continue...\n");
+    getchar();
 
     switch ( spu_ptr->cs[spu_ptr->ip] )
     {

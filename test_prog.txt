@@ -3,12 +3,17 @@
 in
 in ; some comment
 add
+
+push 2
+pop rcx
+
 pop rax
 
 push rax
-push rax
+push rcx
+
 mul
+
 out
-pop rbx
+
 hlt
-push 19
