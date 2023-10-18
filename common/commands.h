@@ -10,25 +10,34 @@
 
 //---------------DSL------------------
 
-#define SPU spu_ptr
-#define IP spu_ptr->ip
-#define CS spu_ptr->cs
-#define REGISTERS spu_ptr->registers
-#define PROG_RES_PTR prog_res
+#define _SPU spu_ptr
+#define _IP spu_ptr->ip
+#define _CS spu_ptr->cs
+#define _REGISTERS spu_ptr->registers
+#define _PROG_RES_PTR prog_res
 
-#define PUSH_(x) stack_push( &SPU->stk, (x) )
-#define POP_(POINTER) stack_pop( &SPU->stk, (POINTER) )
+#define _IM_CONST_T spu_stack_elem_t
+#define _REG_T uint8_t
+#define _PROG_RES_T double
 
-// можно ли вместо этого дефайна использовать inline функцию?
-// тогда она окажется объявлена посреди enum, внутри массивов...
-// можно сделать inline в spu
-#define GET_REG_(INFO_BYTE_, REG_) do                                        \
+#define PROG_RES_T_SPECF "%lf"
+
+#define _PUSH(x) STACK_FUNC_WRAP(stack_push( &SPU->stk, (x) ))
+#define _POP(ptr_to) STACK_FUNC_WRAP(stack_pop( &SPU->stk, (ptr_to) ))
+
+#define _CHECK_SPU SPU_CHECK(_SPU)
+#define _GET_INFO_BYTE _CS[_IP+1]
+#define _IS_IM_CONST test_bit(_GET_INFO_BYTE, BIT_IMMEDIATE_CONST)
+#define _IS_REG test_bit(_GET_INFO_BYTE, BIT_REGISTER)
+#define _IS_MEM test_bit(_GET_INFO_BYTE, BIT_MEMORY)
+#define _GET_IM_CONST  *((spu_stack_elem_t *) (_CS + _IP))
+#define GET_REG_(REG_PTR_) do                                       \
 {                                                                           \
-    REG_ = 0;                                                               \
-    for ( uint8_t bit = BIT_REG_ID_START; bit <= BIT_REG_ID_END; bit++ )    \
+    *REG_PTR_ = 0;                                                               \
+    for ( _REG_T bit = BIT_REG_ID_START; bit <= BIT_REG_ID_END; bit++ )    \
     {                                                                       \
-        if ( (uint8_t) (INFO_BYTE_) & bit )                          \
-            (REG_) = set_bit( (REG_), bit - BIT_REG_ID_START);      \
+        if ( (_REG_T) (_GET_INFO_BYTE) & bit )                          \
+            (*REG_PTR_) = set_bit( (*REG_PTR_), bit - BIT_REG_ID_START);      \
     }                                                                       \
 } while (0)                                                                 \
 
@@ -39,22 +48,18 @@ DEF_CMD(UNKNOWN,    0,  0,  0,  0, {
 })
 
 DEF_CMD(PUSH,       1,  1,  1,  0, {
-    SPU_CHECK(SPU);
+    _CHECK_SPU;
 
-    IP++;
-
-    if ( CS[IP] & BIT_IMMEDIATE_CONST )
+    if ( _IS_IM_CONST )
     {
-        IP++;
-        spu_stack_elem_t im_const = *((spu_stack_elem_t *) (CS + IP));
-        STACK_FUNC_WRAP( PUSH_(im_const) );
+        _PUSH(_GET_IM_CONST);
         IP += sizeof(SPU_STACK_ELEM_T);
     }
-    else if ( CS[IP] & BIT_REGISTER )
+    else if ( _IS_REG )
     {
-        uint8_t REG = 0;
-        GET_REG_( (CS[IP]), REG );
-        STACK_FUNC_WRAP( PUSH_( REGISTERS[REG] ) );
+        _REG_T reg = 0;
+        GET_REG_( *reg );
+        _PUSH( _REGISTERS[reg] );
         IP++;
     }
     else
@@ -66,15 +71,13 @@ DEF_CMD(PUSH,       1,  1,  1,  0, {
 })
 
 DEF_CMD(POP,        2,  0,  1,  0, {
-    SPU_CHECK(SPU);
+    _CHECK_SPU;
 
-    IP++;
-
-    if ( CS[IP] & BIT_REGISTER )
+    if ( _IS_REG )
     {
-        uint8_t REG = 0;
-        GET_REG_( (CS[IP]), REG );
-        STACK_FUNC_WRAP( POP_( &(REGISTERS[REG]) ) );
+        _REG_T reg = 0;
+        GET_REG_( *reg );
+        _POP(_REGISTERS[reg]);
         IP++;
     }
     else
@@ -86,12 +89,13 @@ DEF_CMD(POP,        2,  0,  1,  0, {
 })
 
 DEF_CMD(ADD,        3,  0,  0,  0, {
-    SPU_CHECK(SPU);
+    _CHECK_SPU;
 
-    spu_stack_elem_t a = 0, b = 0;
-    STACK_FUNC_WRAP( POP_( &(a) ) );
-    STACK_FUNC_WRAP( POP_( &(b) ) );
-    STACK_FUNC_WRAP( PUSH_( a + b ) );
+    _IM_CONST_T a = 0;
+    _IM_CONST_T b = 0;
+    _POP(&a);
+    _POP(&b);
+    _PUSH( a + b );
 
     IP++;
 
@@ -99,12 +103,13 @@ DEF_CMD(ADD,        3,  0,  0,  0, {
 })
 
 DEF_CMD(SUB,        4,  0,  0,  0, {
-    SPU_CHECK(SPU);
+    _CHECK_SPU;
 
-    spu_stack_elem_t a = 0, b = 0;
-    STACK_FUNC_WRAP( POP_( &(a) ) );
-    STACK_FUNC_WRAP( POP_( &(b) ) );
-    STACK_FUNC_WRAP( PUSH_( b - a ) );
+    _IM_CONST_T a = 0;
+    _IM_CONST_T b = 0;
+    _POP(&a);
+    _POP(&b);
+    _PUSH( b - a );
 
     IP++;
 
@@ -112,12 +117,13 @@ DEF_CMD(SUB,        4,  0,  0,  0, {
 })
 
 DEF_CMD(MUL,        5,  0,  0,  0, {
-    SPU_CHECK(SPU);
+    _CHECK_SPU;
 
-    spu_stack_elem_t a = 0, b = 0;
-    STACK_FUNC_WRAP( POP_( &(a) ) );
-    STACK_FUNC_WRAP( POP_( &(b) ) );
-    STACK_FUNC_WRAP( PUSH_( (a * b) / COMPUTATIONAL_MULTIPLIER ) );
+    _IM_CONST_T a = 0;
+    _IM_CONST_T b = 0;
+    _POP(&a);
+    _POP(&b);
+    _PUSH( (a * b) / COMPUTATIONAL_MULTIPLIER );
 
     IP++;
 
@@ -125,14 +131,15 @@ DEF_CMD(MUL,        5,  0,  0,  0, {
 })
 
 DEF_CMD(DIV,        6,  0,  0,  0, {
-    SPU_CHECK(SPU);
+    _CHECK_SPU;
 
-    spu_stack_elem_t a = 0, b = 0;
-    STACK_FUNC_WRAP( POP_( &(a) ) );
-    STACK_FUNC_WRAP( POP_( &(b) ) );
+    _IM_CONST_T a = 0;
+    _IM_CONST_T b = 0;
+    _POP(&a);
+    _POP(&b);
     if (b == 0)
         return SPU_STATUS_ERROR_DIV_BY_ZERO;
-    STACK_FUNC_WRAP( PUSH_( (a / b) * COMPUTATIONAL_MULTIPLIER ) );
+    _PUSH((a / b) * COMPUTATIONAL_MULTIPLIER );
 
     IP++;
 
@@ -140,15 +147,15 @@ DEF_CMD(DIV,        6,  0,  0,  0, {
 })
 
 DEF_CMD(IN,         7,  0,  0,  0, {
-    SPU_CHECK(SPU);
+    _CHECK_SPU;
 
-    double in = 0;
+    _PROG_RES_T in = 0;
 
     fprintf(stdout, "Please enter 'in':\n");
-    if ( fscanf(stdin, "%lf", &in) != 1 )
+    if ( fscanf(stdin, PROG_RES_T_SPECF, &in) != 1 )
         return SPU_STATUS_ERROR_WRONG_IN;
 
-    STACK_FUNC_WRAP( PUSH_( (spu_stack_elem_t) (in * COMPUTATIONAL_MULTIPLIER) ) );
+    _PUSH( (_IM_CONST_T) (in * COMPUTATIONAL_MULTIPLIER) );
 
     IP++;
 
@@ -156,12 +163,12 @@ DEF_CMD(IN,         7,  0,  0,  0, {
 })
 
 DEF_CMD(OUT,        8,  0,  0,  0, {
-    SPU_CHECK(SPU);
-    assert( PROG_RES_PTR );
+    _CHECK_SPU;
+    assert( _PROG_RES_PTR );
 
-    spu_stack_elem_t buf = 0;
-    STACK_FUNC_WRAP( POP_( &buf ) );
-    *PROG_RES_PTR = ( (double) buf ) / COMPUTATIONAL_MULTIPLIER;
+    _IM_CONST_T buf = 0;
+    _POP(&buf);
+    *PROG_RES_PTR = ( (_PROG_RES_T) buf ) / COMPUTATIONAL_MULTIPLIER;
 
     IP++;
 

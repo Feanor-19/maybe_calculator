@@ -458,6 +458,8 @@ inline SPUStatus exec_cmd_out(SPU *spu_ptr, double *prog_res)
     return SPU_STATUS_OK;
 }
 
+inline
+
 #define DEF_CMD(name, id, is_im_const, is_reg, is_mem, ...)     \
     case CMD_##name:                                            \
         __VA_ARGS__                                             \
