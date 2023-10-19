@@ -4,12 +4,14 @@ const char* FLAG_HELP               = "-h";
 const char* FLAG_INPUT_FILE         = "-i";
 const char* FLAG_OUTPUT_FILE        = "-o";
 const char* FLAG_PARAMS_FILE        = "-p";
+const char* FLAG_DEBUG_MODE         = "-d";
 
 CmdLineFlag supported_flags[] = {
                                     { FLAG_HELP             , 0, 0, "" },
                                     { FLAG_INPUT_FILE       , 0, 1, "" },
                                     { FLAG_OUTPUT_FILE      , 0, 1, "" },
-                                    { FLAG_PARAMS_FILE      , 0, 1, "" }
+                                    { FLAG_PARAMS_FILE      , 0, 1, "" },
+                                    { FLAG_DEBUG_MODE       , 0, 0, "" }
                                 };
 
 const char *help_message = "No help message yet :-(";
@@ -53,7 +55,7 @@ static Config assemble_config(size_t n_flags, CmdLineFlag flags[])
     const char *FILE_OUT_DEFAULT_NAME       = "spu_out.txt";
     const char *FILE_PARAMS_DEFAULT_NAME    = "spu_params.txt";
 
-    Config config = {"", "", "", CONFIG_NO_ERROR};
+    Config config = {};
 
     CmdLineFlag *p_curr_flag = NULL;
 
@@ -102,6 +104,16 @@ static Config assemble_config(size_t n_flags, CmdLineFlag flags[])
         config.params_file_name = FILE_PARAMS_DEFAULT_NAME;
     }
 
+    if ( (p_curr_flag = extract(n_flags, supported_flags, FLAG_DEBUG_MODE) )!= NULL
+       && p_curr_flag->state )
+    {
+        config.debug_mode = 1;
+    }
+    else
+    {
+        config.debug_mode = 0;
+    }
+
     return config;
 
 }
@@ -112,10 +124,14 @@ void print_config(FILE *stream, Config cfg)
     assert(cfg.error == CONFIG_NO_ERROR);
 
     printf("The following configuration is set:\n"
-    "input file:                            <%s>\n"
-    "output file:                           <%s>\n"
-    "parametres file:                       <%s>\n",
-    cfg.input_file_name, cfg.output_file_name, cfg.params_file_name);
+        "input file:                            <%s>\n"
+        "output file:                           <%s>\n"
+        "parametres file:                       <%s>\n"
+        "debug mode:                            <%s>\n",
+        cfg.input_file_name,
+        cfg.output_file_name,
+        cfg.params_file_name,
+        ( cfg.debug_mode ? "ON" : "OFF") );
 }
 
 void print_cfg_error_message(FILE *stream, ConfigError error)

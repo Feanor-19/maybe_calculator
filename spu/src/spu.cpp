@@ -136,6 +136,9 @@ SPUStatus SPU_ctor(SPU* spu_ptr, Config cfg)
     SPUStatus err = load_prog_into_spu_(spu_ptr, cfg.input_file_name);
     if (err) return err;
 
+    if (cfg.debug_mode)
+        spu_ptr->debug_mode = 1;
+
     return SPU_STATUS_OK;
 }
 
@@ -324,142 +327,6 @@ SPUStatus run_program(SPU *spu_ptr, double *prog_res)
     }
 }
 
-/*
-inline SPUStatus exec_cmd_push(SPU *spu_ptr)
-{
-    SPU_CHECK(spu_ptr);
-
-    if ( spu_ptr->cs[spu_ptr->ip] & BIT_IMMEDIATE_CONST )
-    {
-        spu_ptr->ip++;
-        int im_const = *((int *) (spu_ptr->cs + spu_ptr->ip));
-        STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, im_const) );
-        spu_ptr->ip += sizeof(int);
-    }
-    else if ( spu_ptr->cs[spu_ptr->ip] & BIT_REGISTER )
-    {
-        spu_ptr->ip++;
-        char reg = spu_ptr->cs[spu_ptr->ip];
-        STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, spu_ptr->registers[(int) reg]) );
-        spu_ptr->ip += sizeof(char);
-    }
-    else
-    {
-        return SPU_STATUS_ERROR_UNKNOWN_CMD;
-    }
-
-    return SPU_STATUS_OK;
-}
-
-inline SPUStatus exec_cmd_pop(SPU *spu_ptr)
-{
-    SPU_CHECK(spu_ptr);
-
-    if ( spu_ptr->cs[spu_ptr->ip] & BIT_REGISTER )
-    {
-        spu_ptr->ip++;
-        char reg = spu_ptr->cs[spu_ptr->ip];
-        STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &(spu_ptr->registers[(int) reg]) ) );
-        spu_ptr->ip += sizeof(char);
-    }
-    else
-    {
-        return SPU_STATUS_ERROR_UNKNOWN_CMD;
-    }
-
-    return SPU_STATUS_OK;
-}
-
-inline SPUStatus exec_cmd_add(SPU *spu_ptr)
-{
-    SPU_CHECK(spu_ptr);
-
-    int a = 0, b = 0;
-    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &b ) );
-    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &a ) );
-    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, a + b ) );
-
-    spu_ptr->ip++;
-
-    return SPU_STATUS_OK;
-}
-
-inline SPUStatus exec_cmd_sub(SPU *spu_ptr)
-{
-    SPU_CHECK(spu_ptr);
-
-    int a = 0, b = 0;
-    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &b ) );
-    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &a ) );
-    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, a - b ) );
-
-    spu_ptr->ip++;
-
-    return SPU_STATUS_OK;
-}
-
-inline SPUStatus exec_cmd_mul(SPU *spu_ptr)
-{
-    SPU_CHECK(spu_ptr);
-
-    int a = 0, b = 0;
-    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &b ) );
-    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &a ) );
-    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, (a * b) / COMPUTATIONAL_MULTIPLIER ) );
-
-    spu_ptr->ip++;
-
-    return SPU_STATUS_OK;
-}
-
-inline SPUStatus exec_cmd_div(SPU *spu_ptr)
-{
-    SPU_CHECK(spu_ptr);
-
-    int a = 0, b = 0;
-    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &b ) );
-    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &a ) );
-    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, (a / b)*COMPUTATIONAL_MULTIPLIER ) );
-
-    spu_ptr->ip++;
-
-    return SPU_STATUS_OK;
-}
-
-
-inline SPUStatus exec_cmd_in(SPU *spu_ptr)
-{
-    SPU_CHECK(spu_ptr);
-
-    double in = 0;
-
-    fprintf(stdout, "Please enter 'in':\n");
-    if ( fscanf(stdin, "%lf", &in) != 1 )
-        return SPU_STATUS_ERROR_WRONG_IN;
-
-    STACK_FUNC_WRAP( stack_push( &spu_ptr->stk, (int) (in * COMPUTATIONAL_MULTIPLIER) ) );
-
-    spu_ptr->ip++;
-
-    return SPU_STATUS_OK;
-}
-
-
-inline SPUStatus exec_cmd_out(SPU *spu_ptr, double *prog_res)
-{
-    SPU_CHECK(spu_ptr);
-    assert(prog_res);
-
-    int buf = 0;
-    STACK_FUNC_WRAP( stack_pop( &spu_ptr->stk, &buf ) );
-    *prog_res = ( (double) buf ) / COMPUTATIONAL_MULTIPLIER;
-
-    spu_ptr->ip++;
-
-    return SPU_STATUS_OK;
-}
-*/
-
 #define DEF_CMD(name, id, is_im_const, is_reg, is_mem, ...)     \
     case CMD_##name:                                            \
         __VA_ARGS__                                             \
@@ -470,10 +337,13 @@ SPUStatus exec_curr_cmd_(SPU *spu_ptr, double *prog_res)
     SPU_CHECK(spu_ptr);
     assert(prog_res);
 
-    //TODO - обернуть вот эту прикольную штуку как пошаговое выполнение, включаемое флагом
-    SPU_DUMP(spu_ptr, 0);
-    printf("Press enter to continue...\n");
-    getchar();
+    if (spu_ptr->debug_mode)
+    {
+        SPU_DUMP(spu_ptr, 0);
+        fprintf(stdout, "Press enter to continue...\n");
+        getc(stdin);
+    }
+    // TODO - сделать чтобы после исполнения команды in чистился буфер
 
     switch ( spu_ptr->cs[spu_ptr->ip] )
     {

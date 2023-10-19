@@ -39,6 +39,7 @@ struct Config
     const char *input_file_name;        //!< Name of the file with program.
     const char *output_file_name;       //!< Name of the file where to put translated to binary program.
     const char *params_file_name;       //!< Name of the file to get params for command 'in' from.
+    int debug_mode;                     //!< Debug mode [0/1]
     ConfigError error;                  //!< ConfigError enum value.
     int unread_flags;                   //!< Number of unrecognized flags.
 };

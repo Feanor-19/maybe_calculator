@@ -27,7 +27,7 @@
 #define _REG_T uint8_t
 #define _PROG_RES_T double
 
-#define PROG_RES_T_SPECF "%lf"
+#define _PROG_RES_T_SPECF "%lf"
 
 #define _ADD(a, b) ((a) + (b))
 #define _SUB(a, b) ((a) - (b))
@@ -46,16 +46,16 @@
 #define _IS_REG test_bit(_GET_INFO_BYTE, BIT_REGISTER)
 #define _IS_MEM test_bit(_GET_INFO_BYTE, BIT_MEMORY)
 #define _GET_IM_CONST  *((_IM_CONST_T *) (_CS + _IP + 2))
-#define GET_REG_(REG_PTR_) do                                       \
+#define _GET_REG_(REG_PTR_) do                                               \
 {                                                                           \
-    *REG_PTR_ = 0;                                                               \
-    for ( _REG_T bit = BIT_REG_ID_START; bit <= BIT_REG_ID_END; bit++ )    \
+    *REG_PTR_ = 0;                                                          \
+    for ( _REG_T bit = BIT_REG_ID_START; bit <= BIT_REG_ID_END; bit++ )     \
     {                                                                       \
-        if ( (_REG_T) (_GET_INFO_BYTE) & (1 << bit) )                          \
-            (*REG_PTR_) = set_bit( (*REG_PTR_), bit - BIT_REG_ID_START);      \
+        if ( (_REG_T) (_GET_INFO_BYTE) & (1 << bit) )                       \
+            (*REG_PTR_) = set_bit( (*REG_PTR_), bit - BIT_REG_ID_START);    \
     }                                                                       \
-    printf("!!!!!!!! *REG_PTR_ : <%d>, INFO_BYTE : <%d>\n", *REG_PTR_, _GET_INFO_BYTE ); \
-} while (0)                                                                 \
+} while (0)
+#define _CLEAR_IN_BUF() while( getc(stdin) != '\n' )                                                             \
 
 //---------------CMD------------------
 
@@ -72,7 +72,7 @@ DEF_CMD(PUSH,       1,  1,  1,  0, {
     else if ( _IS_REG )
     {
         _REG_T reg = 0;
-        GET_REG_( &reg );
+        _GET_REG_( &reg );
         _PUSH( _REGISTERS[reg] );
         _IP += 2;
     }
@@ -88,7 +88,7 @@ DEF_CMD(POP,        2,  0,  1,  0, {
     if ( _IS_REG )
     {
         _REG_T reg = 0;
-        GET_REG_( &reg );
+        _GET_REG_( &reg );
         _POP(&(_REGISTERS[reg]));
         _IP += 2;
     }
@@ -154,8 +154,10 @@ DEF_CMD(IN,         7,  0,  0,  0, {
     _PROG_RES_T in = 0;
 
     fprintf(stdout, "Please enter 'in':\n");
-    if ( fscanf(stdin, PROG_RES_T_SPECF, &in) != 1 )
+    if ( fscanf(stdin, _PROG_RES_T_SPECF, &in) != 1 )
         return SPU_STATUS_ERROR_WRONG_IN;
+
+    _CLEAR_IN_BUF();
 
     _PUSH( _CAST_PROG_RES_TO_IM_CONST( in ) );
 
@@ -180,13 +182,33 @@ DEF_CMD(HLT,        9,  0,  0,  0, {
 
 //-------------UNDEF DSL--------------
 
-#undef SPU
-#undef IP
-#undef CS
-#undef REGISTERS
-#undef PROG_RES_PTR
+#undef _SPU
+#undef _IP
+#undef _CS
+#undef _REGISTERS
+#undef _PROG_RES_PTR
 
-#undef PUSH_
-#undef POP_
+#undef _IM_CONST_T
+#undef _REG_T
+#undef _PROG_RES_T
 
-#undef GET_REG_
+#undef _PROG_RES_T_SPECF
+
+#undef _ADD
+#undef _SUB
+#undef _DIV
+#undef _MUL
+
+#undef _CAST_PROG_RES_TO_IM_CONST
+#undef _CAST_IM_CONST_TO_PROG_RES
+
+#undef _PUSH
+#undef _POP
+
+#undef _CHECK_SPU
+#undef _GET_INFO_BYTE
+#undef _IS_IM_CONST
+#undef _IS_REG
+#undef _IS_MEM
+#undef _GET_IM_CONST
+#undef _GET_REG_
