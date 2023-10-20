@@ -6,55 +6,73 @@
 
 #include <stdint.h>
 
-enum AssemblerError
+//! @brief Everything between this symbol and the end of line is considered as a comment.
+const char COMMENT_SYMB = ';';
+const size_t LABEL_NAME_MAX_LEN = 33;
+const size_t MAX_LABELS_COUNT = 10; //TODO - поменять массив меток на динамический
+
+//-------------------------------------------------------------------------------------------------------------
+
+//TODO - и возможно генерировать с помощью макросов
+enum AssemblerStatus
 {
-    ASM_ERROR_NO_ERROR                  = 0,
-    ASM_ERROR_GET_IN_OUT_FILES_NAMES    = 1,
-    ASM_ERROR_READ_INPUT_FILE           = 2,
-    ASM_ERROR_CANT_OPEN_OUTPUT_FILE     = 3,
-    ASM_ERROR_MEM_ALLOC                 = 4,
-    ASM_ERROR_UNKOWN_COMMAND            = 5,
-    ASM_ERROR_CMD_ARG                   = 6,
-    ASM_ERROR_CMD_ARG_TOO_BIG           = 7,
+    ASM_STATUS_OK                              = 0,
+    ASM_STATUS_CURR_LINE_IS_A_LABEL,
+
+    ASM_STATUS_ERROR_GET_IN_OUT_FILES_NAMES,
+    ASM_STATUS_ERROR_READ_INPUT_FILE,
+    ASM_STATUS_ERROR_CANT_OPEN_OUTPUT_FILE,
+    ASM_STATUS_ERROR_MEM_ALLOC,
+    ASM_STATUS_ERROR_UNKOWN_COMMAND,
+    ASM_STATUS_ERROR_CMD_ARG,
+    ASM_STATUS_ERROR_CMD_ARG_TOO_BIG,
+    ASM_STATUS_ERROR_LABEL_REDEFINED,
+    ASM_STATUS_ERROR_UNDEFINED_LABEL,
 };
 
 const char *assembler_error_messages[] =
 {
-    "ASM_ERROR_NO_ERROR",
-    "ASM_ERROR_GET_IN_OUT_FILES_NAMES",
-    "ASM_ERROR_READ_INPUT_FILE",
-    "ASM_ERROR_CANT_OPEN_OUTPUT_FILE",
-    "ASM_ERROR_MEM_ALLOC",
-    "ASM_ERROR_UNKOWN_COMMAND",
-    "ASM_ERROR_CMD_ARG",
-    "ASM_ERROR_CMD_ARG_TOO_BIG"
+    "ASM_STATUS_OK",
+    "ASM_STATUS_CURR_LINE_IS_A_LABEL",
+    "ASM_STATUS_ERROR_GET_IN_OUT_FILES_NAMES",
+    "ASM_STATUS_ERROR_READ_INPUT_FILE",
+    "ASM_STATUS_ERROR_CANT_OPEN_OUTPUT_FILE",
+    "ASM_STATUS_ERROR_MEM_ALLOC",
+    "ASM_STATUS_ERROR_UNKOWN_COMMAND",
+    "ASM_STATUS_ERROR_CMD_ARG",
+    "ASM_STATUS_ERROR_CMD_ARG_TOO_BIG",
+    "ASM_STATUS_ERROR_LABEL_REDEFINED",
+    "ASM_STATUS_ERROR_UNDEFINED_LABEL"
 };
 
 struct Input
 {
     Text text;
     FileBuf file_buf;
-    AssemblerError err;
+    AssemblerStatus err;
 };
 
 struct BinOut
 {
-    int8_t *bin_arr;    //< Array of bytes - machine code.
-    size_t bin_arr_len; //< Length of non-empty part of arr.
-    AssemblerError err; //< Holds current error state.
+    int8_t *bin_arr;        //< Array of bytes - machine code.
+    size_t bin_arr_len;     //< Length of non-empty part of arr.
+    AssemblerStatus err;    //< Holds current error state.
 };
 
+//TODO - стоит ли сделать union?
 struct CmdArg
 {
-    immediate_const_t im_const;     //< Is used if needed.
-    int8_t info_byte;               //< See common.h ("Структура байта с информацией") for details.
-    AssemblerError err;             //< Holds current error state.
+    immediate_const_t im_const;             //< Is used if needed.
+    char label_name[LABEL_NAME_MAX_LEN];    //< Is used if needed.
+    int8_t info_byte;                       //< See common.h ("Структура байта с информацией") for details.
+    AssemblerStatus err;                    //< Holds current error state.
 };
 
-//-------------------------------------------------------------------------------------------------------------
-
-//! @brief Everything between this symbol and the end of line is considered as a comment.
-const char COMMENT_SYMB = ';';
+struct Label
+{
+    char name[LABEL_NAME_MAX_LEN];  //< Label's name.
+    size_t bin_arr_ind;             //< Position of the label in the bin_arr.
+};
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -71,7 +89,9 @@ void preprocess_input(Input input);
 
 BinOut translate_to_binary(Input input);
 
-AssemblerError write_bin_to_output(BinOut bin_out, const char *output_file_name);
+
+
+AssemblerStatus write_bin_to_output(BinOut bin_out, const char *output_file_name);
 
 //! @details Recieves string consisting of command's name and its argument (if needed),
 //! returns corresponding element from enum Command and sets *cmd_end_ptr to the index
@@ -84,7 +104,7 @@ Command get_command(char *str, size_t *cmd_end_ptr);
 
 CmdArg get_arg(Command cmd, const char *arg);
 
-void print_asm_error_message(AssemblerError err);
+void print_asm_error_message(AssemblerStatus err);
 
 //! @brief Frees memory, allocated for input.text and
 //! input.file_buf.

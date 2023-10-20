@@ -1,18 +1,24 @@
 #include <stdio.h>
+#include <ctype.h>
 
 #include "disassembler.h"
 
-void f(int *x)
+int f(int x)
 {
-    *x = 19;
+    static int j = 0;
+    if (x >=0 )
+    {
+        j += x;
+    }
+    return j;
 }
-
-#define F() ( f(&x), x )
 
 int main()
 {
-    int a = 0;
-    //a = (int x = 0, 0);
-    printf("%d", a);
+    printf("<%d>\n", f(0));
+    printf("<%d>\n", f(1));
+    printf("<%d>\n", f(2));
+    printf("<%d>\n", f(0));
+    printf("<%d>\n", f(19));
     return 0;
 }

@@ -2,11 +2,28 @@
 #include <ctype.h>
 #include <limits.h>
 
+#include "assembler.h"
+
+struct Fixup
+{
+    size_t cs_offset_arg_location;          //< Номер байта с начала _бинарного файла_ в который надо записать смещение метки
+    char label_name[LABEL_NAME_MAX_LEN];    //< Имя метки
+};
+
+typedef Fixup Elem_t;
+inline void print_elem_t(FILE *stream, Elem_t val)
+{
+    fprintf(stream, "{<%lld> : <%s>}", val.cs_offset_arg_location, val.label_name);
+}
+#define STACK_DO_DUMP
+#define STACK_USE_POISON
+#define STACK_USE_PROTECTION_CANARY
+#define STACK_USE_PROTECTION_HASH
+#include "..\..\common\stack.h"
+
 #include "config_asm.h"
 #include "..\..\common\utils.h"
 #include "..\..\common\mystring.h"
-
-#include "assembler.h"
 
 int main(int argc, const char *argv[])
 {
@@ -14,7 +31,7 @@ int main(int argc, const char *argv[])
     if (cfg.error)
     {
         print_cfg_error_message(stderr, cfg.error);
-        return ASM_ERROR_GET_IN_OUT_FILES_NAMES;
+        return ASM_STATUS_ERROR_GET_IN_OUT_FILES_NAMES;
     }
 
     print_config(stdout, cfg);
@@ -27,7 +44,7 @@ int main(int argc, const char *argv[])
     BinOut bin_out = translate_to_binary(input);
     CHECK_ERR_(bin_out.err);
 
-    AssemblerError err = write_bin_to_output(bin_out, cfg.output_file_name);
+    AssemblerStatus err = write_bin_to_output(bin_out, cfg.output_file_name);
     CHECK_ERR_(err);
 
     free_struct_input(input);
@@ -47,7 +64,7 @@ Input read_input_file(const char* input_file_name)
     if (err)
     {
         print_onegin_error_message(err);
-        input.err = ASM_ERROR_READ_INPUT_FILE;
+        input.err = ASM_STATUS_ERROR_READ_INPUT_FILE;
         return input;
     }
 
@@ -82,6 +99,18 @@ inline void preprocess_input_toupper(Input input)
     }
 }
 
+//! @brief Moves pointers in input.text.line_array so that initial spaces are skipped
+inline void preprocess_input_skip_initial_spaces(Input input)
+{
+    for (unsigned long ind = 0; ind < input.text.nLines; ind++)
+    {
+        char *ptr = input.text.line_array[ind];
+        while ( *ptr == ' ' && *ptr != '\0')
+            ptr++;
+        input.text.line_array[ind] = ptr;
+    }
+}
+
 void preprocess_input(Input input)
 {
     ASSERT_INPUT_(input);
@@ -89,6 +118,8 @@ void preprocess_input(Input input)
     preprocess_input_handle_comments_(input);
 
     preprocess_input_toupper(input);
+
+    preprocess_input_skip_initial_spaces(input);
 }
 
 inline void print_translation_error(unsigned long line, const char *str)
@@ -112,7 +143,85 @@ inline void write_header_to_bin(int8_t * bin_arr, size_t bin_final_len)
 
 inline int can_cmd_have_arg(Command cmd)
 {
-    return command_needs_im_const_arg[(int) cmd] || command_needs_register_arg[(int) cmd];
+    return command_needs_im_const_arg[(int) cmd]
+        || command_needs_register_arg[(int) cmd]
+        ||    command_needs_label_arg[(int) cmd];
+}
+
+inline AssemblerStatus handle_cmd_arg(  int8_t *bin_arr,
+                                        size_t *bin_arr_ind_ptr,
+                                        CmdArg cmd_arg,
+                                        Stack *fixup_stk_ptr )
+{
+
+    bin_arr[(*bin_arr_ind_ptr)++] = cmd_arg.info_byte;
+    if ( test_bit(cmd_arg.info_byte, BIT_IMMEDIATE_CONST) )
+    {
+        *((immediate_const_t *) (bin_arr + (*bin_arr_ind_ptr))) = cmd_arg.im_const;
+        (*bin_arr_ind_ptr) += sizeof(immediate_const_t);
+    }
+    else if ( test_bit(cmd_arg.info_byte, BIT_CS_OFFSET) )
+    {
+        Fixup tmp = {};
+        tmp.cs_offset_arg_location = (*bin_arr_ind_ptr);
+        strncpy(tmp.label_name, cmd_arg.label_name, LABEL_NAME_MAX_LEN);
+        stack_push(fixup_stk_ptr, tmp);
+
+        *((cs_offset_t *) (bin_arr + (*bin_arr_ind_ptr))) = CS_OFFSET_POISON_VALUE;
+        (*bin_arr_ind_ptr) += sizeof(cs_offset_t);
+    }
+    return ASM_STATUS_OK;
+}
+
+inline Label* find_label( Label labels[], const char *label_name )
+{
+    for (size_t ind = 0; ind < MAX_LABELS_COUNT; ind++)
+    {
+        if ( strcmp(labels[ind].name, label_name) == 0 )
+            return labels + ind;
+    }
+    return NULL;
+}
+
+inline int check_last_char(const char *str, char c)
+{
+    return str[strlen(str) - 1] == c;
+}
+
+//! @brief Checks if str contains a valid label (without spaces in it and ends with ':')
+// and remembers label's location and name.
+inline AssemblerStatus check_if_label_and_handle( const char *str, size_t bin_arr_ind, Label labels[] )
+{
+    char label[LABEL_NAME_MAX_LEN] = "---";
+    if ( sscanf(str, "%s", label) != 1 || !check_last_char(label, ':'))
+        return ASM_STATUS_OK; // not a label
+
+    static size_t labels_ind = 0;
+
+    if ( find_label(labels, label) )
+        return ASM_STATUS_ERROR_LABEL_REDEFINED;
+
+    Label tmp = {};
+    tmp.bin_arr_ind = bin_arr_ind;
+    strncpy(tmp.name, label, strlen(label) - 1);
+
+    labels[labels_ind++] = tmp;
+    return ASM_STATUS_CURR_LINE_IS_A_LABEL;
+}
+
+inline AssemblerStatus handle_fixup(int8_t* bin_arr, Stack *fixup_stk_ptr, Label labels[])
+{
+    Fixup fixup = {};
+    while ( stack_pop( fixup_stk_ptr, &fixup ) != STACK_ERROR_NOTHING_TO_POP )
+    {
+        Label *lbl_ptr = find_label(labels, fixup.label_name );
+        if (!lbl_ptr)
+            return ASM_STATUS_ERROR_UNDEFINED_LABEL;
+
+        *((cs_offset_t *) (bin_arr + fixup.cs_offset_arg_location)) = (cs_offset_t) (lbl_ptr->bin_arr_ind - HEADER_SIZE_IN_BYTES);
+    }
+
+    return ASM_STATUS_OK;
 }
 
 BinOut translate_to_binary(Input input)
@@ -128,14 +237,30 @@ BinOut translate_to_binary(Input input)
     int8_t *bin_arr = (int8_t *) calloc(START_BIN_ARR_SIZE, sizeof(char));
     if (!bin_arr)
     {
-        bin_out.err = ASM_ERROR_MEM_ALLOC;
+        bin_out.err = ASM_STATUS_ERROR_MEM_ALLOC;
         return bin_out;
     }
     size_t bin_arr_ind = HEADER_SIZE_IN_BYTES;
 
+    Stack fixup_stk = {};
+    stack_ctor(&fixup_stk);
+
+    Label labels[MAX_LABELS_COUNT] = {};
+
     for (unsigned long ind = 0; ind < input.text.nLines; ind++)
     {
         if ( is_str_empty(input.text.line_array[ind]) ) continue;
+
+        AssemblerStatus label_status = check_if_label_and_handle( input.text.line_array[ind], bin_arr_ind, labels);
+        if (label_status == ASM_STATUS_CURR_LINE_IS_A_LABEL)
+            continue;
+        else if (label_status == ASM_STATUS_ERROR_LABEL_REDEFINED)
+        {
+            print_translation_error(ind + 1, input.text.line_array[ind]);
+            free(bin_arr);
+            bin_out.err = ASM_STATUS_ERROR_LABEL_REDEFINED;
+            return bin_out;
+        }
 
         size_t cmd_end = 0;
         Command cmd = get_command(input.text.line_array[ind], &cmd_end);
@@ -143,7 +268,7 @@ BinOut translate_to_binary(Input input)
         {
             print_translation_error(ind + 1, input.text.line_array[ind]);
             free(bin_arr);
-            bin_out.err = ASM_ERROR_UNKOWN_COMMAND;
+            bin_out.err = ASM_STATUS_ERROR_UNKOWN_COMMAND;
             return bin_out;
         }
 
@@ -158,38 +283,43 @@ BinOut translate_to_binary(Input input)
                 return bin_out;
             }
 
-            bin_arr[bin_arr_ind++] = cmd_arg.info_byte;
-            if ( test_bit(cmd_arg.info_byte, BIT_IMMEDIATE_CONST) )
-            {
-                *((immediate_const_t *) (bin_arr + bin_arr_ind)) = cmd_arg.im_const;
-                bin_arr_ind += sizeof(immediate_const_t);
-            }
+            handle_cmd_arg(bin_arr, &bin_arr_ind, cmd_arg, &fixup_stk);
         }
+    }
+
+    AssemblerStatus error = handle_fixup(bin_arr, &fixup_stk, labels);
+    if (error)
+    {
+        free(bin_arr);
+        bin_out.err = error;
+        return bin_out;
     }
 
     write_header_to_bin(bin_arr, bin_arr_ind);
 
     bin_out.bin_arr = bin_arr;
     bin_out.bin_arr_len = bin_arr_ind;
-    bin_out.err = ASM_ERROR_NO_ERROR;
+    bin_out.err = ASM_STATUS_OK;
+
+    stack_dtor(&fixup_stk);
 
     return bin_out;
 }
 
-AssemblerError write_bin_to_output(BinOut bin_out, const char *output_file_name)
+AssemblerStatus write_bin_to_output(BinOut bin_out, const char *output_file_name)
 {
     FILE* out = fopen(output_file_name, "wb");
     if (!out)
     {
         fclose(out);
-        return ASM_ERROR_CANT_OPEN_OUTPUT_FILE;
+        return ASM_STATUS_ERROR_CANT_OPEN_OUTPUT_FILE;
     }
 
     fwrite(bin_out.bin_arr, sizeof(char), bin_out.bin_arr_len, out);
 
     fclose(out);
 
-    return ASM_ERROR_NO_ERROR;
+    return ASM_STATUS_OK;
 }
 
 inline size_t find_cmd_end( const char *str)
@@ -201,10 +331,20 @@ inline size_t find_cmd_end( const char *str)
         return cmd_end_char_ptr - str;
 }
 
+/*
+inline char *skip_spaces(char *str)
+{
+    while ( isspace(*str) )
+        str++;
+    return str;
+}
+*/
 Command get_command(char *str, size_t *cmd_end_ptr)
 {
     assert(str);
     assert(cmd_end_ptr);
+
+    //str = skip_spaces(str); // TODO - должно быть не тут... иначе cmd_end врет
 
     *cmd_end_ptr = find_cmd_end(str);
     int space_was_changed_to_zero = 0;
@@ -216,8 +356,6 @@ Command get_command(char *str, size_t *cmd_end_ptr)
 
     for (size_t cmd_ind = 1; cmd_ind < commands_list_len; cmd_ind++)
     {
-        // данная версия использует функции из стандартной библиотеки, а потому
-        // более понятна и читаема, но делает несколько проходов по строчке
         if ( strcmp(str, commands_list[cmd_ind] ) == 0 )
         {
             if ( space_was_changed_to_zero )
@@ -269,30 +407,36 @@ CmdArg get_arg(Command cmd, const char *arg)
     {
         if ( (int) (immediate_const_raw) >= INT_MAX / COMPUTATIONAL_MULTIPLIER )
         {
-            cmd_arg.err = ASM_ERROR_CMD_ARG_TOO_BIG;
+            cmd_arg.err = ASM_STATUS_ERROR_CMD_ARG_TOO_BIG;
             return cmd_arg;
         }
 
         cmd_arg.info_byte = set_bit( cmd_arg.info_byte, BIT_IMMEDIATE_CONST );
         cmd_arg.im_const = (immediate_const_t) (immediate_const_raw * COMPUTATIONAL_MULTIPLIER);
-        cmd_arg.err = ASM_ERROR_NO_ERROR;
+        cmd_arg.err = ASM_STATUS_OK;
     }
     else if ( command_needs_register_arg[(int) cmd]
             && sscanf(arg, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) != -1 )
     {
         cmd_arg.info_byte = set_bit( cmd_arg.info_byte, BIT_REGISTER ) ;
         cmd_arg.info_byte = write_reg_to_info_byte( cmd_arg.info_byte, reg_id );
-        cmd_arg.err = ASM_ERROR_NO_ERROR;
+        cmd_arg.err = ASM_STATUS_OK;
+    }
+    else if ( command_needs_label_arg[(int) cmd]
+            && sscanf(arg, "%s", cmd_arg.label_name) == 1 )
+    {
+        cmd_arg.info_byte = set_bit(cmd_arg.info_byte, BIT_CS_OFFSET);
+        cmd_arg.err = ASM_STATUS_OK;
     }
     else
     {
-        cmd_arg.err = ASM_ERROR_CMD_ARG;
+        cmd_arg.err = ASM_STATUS_ERROR_CMD_ARG;
     }
 
     return cmd_arg;
 }
 
-void print_asm_error_message(AssemblerError err)
+void print_asm_error_message(AssemblerStatus err)
 {
     assert(err);
 

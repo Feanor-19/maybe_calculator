@@ -1,5 +1,5 @@
 /*
-    Аргументы макроса DEF_CMD(name, id, is_im_const, is_reg, is_mem, ...):
+    Аргументы макроса DEF_CMD(name, id, is_im_const, is_reg, is_mem, is_label, ...):
         - имя команды
         - номер (id)
         - требует ли команда аргумент типа immediate const   [1/0]
@@ -23,9 +23,10 @@
 #define _REGISTERS spu_ptr->registers
 #define _PROG_RES_PTR prog_res
 
-#define _IM_CONST_T spu_stack_elem_t
-#define _REG_T uint8_t
-#define _PROG_RES_T double
+#define _IM_CONST_T     spu_stack_elem_t
+#define _REG_T          uint8_t
+#define _PROG_RES_T     double
+#define _CS_OFFSET_T    cs_offset_t
 
 #define _PROG_RES_T_SPECF "%lf"
 
@@ -42,11 +43,11 @@
 
 #define _CHECK_SPU SPU_CHECK(_SPU)
 #define _GET_INFO_BYTE _CS[_IP+1]
-#define _IS_IM_CONST test_bit(_GET_INFO_BYTE, BIT_IMMEDIATE_CONST)
-#define _IS_REG test_bit(_GET_INFO_BYTE, BIT_REGISTER)
-#define _IS_MEM test_bit(_GET_INFO_BYTE, BIT_MEMORY)
-#define _GET_IM_CONST  *((_IM_CONST_T *) (_CS + _IP + 2))
-#define _GET_REG_(REG_PTR_) do                                               \
+#define _IS_ARG_IM_CONST() test_bit(_GET_INFO_BYTE, BIT_IMMEDIATE_CONST)
+#define _IS_ARG_REG() test_bit(_GET_INFO_BYTE, BIT_REGISTER)
+#define _IS_ARG_MEM() test_bit(_GET_INFO_BYTE, BIT_MEMORY)
+#define _GET_ARG_IM_CONST()  *((_IM_CONST_T *) (_CS + _IP + 2))
+#define _GET_ARG_REG(REG_PTR_) do                                               \
 {                                                                           \
     *REG_PTR_ = 0;                                                          \
     for ( _REG_T bit = BIT_REG_ID_START; bit <= BIT_REG_ID_END; bit++ )     \
@@ -55,24 +56,25 @@
             (*REG_PTR_) = set_bit( (*REG_PTR_), bit - BIT_REG_ID_START);    \
     }                                                                       \
 } while (0)
+#define _GET_CS_OFFSET() *((_CS_OFFSET_T *) (_CS + _IP + 2))
 #define _CLEAR_IN_BUF() while( getc(stdin) != '\n' )                                                             \
 
 //---------------CMD------------------
 
-DEF_CMD(UNKNOWN,    0,  0,  0,  0, {
+DEF_CMD(UNKNOWN,    0,  0,  0,  0,  0, {
     return SPU_STATUS_ERROR_UNKNOWN_CMD;
 })
 
-DEF_CMD(PUSH,       1,  1,  1,  0, {
-    if ( _IS_IM_CONST )
+DEF_CMD(PUSH,       1,  1,  1,  0,  0, {
+    if ( _IS_ARG_IM_CONST() )
     {
-        _PUSH(_GET_IM_CONST);
+        _PUSH(_GET_ARG_IM_CONST());
         _IP += 2 + sizeof(_IM_CONST_T);
     }
-    else if ( _IS_REG )
+    else if ( _IS_ARG_REG() )
     {
         _REG_T reg = 0;
-        _GET_REG_( &reg );
+        _GET_ARG_REG( &reg );
         _PUSH( _REGISTERS[reg] );
         _IP += 2;
     }
@@ -84,11 +86,11 @@ DEF_CMD(PUSH,       1,  1,  1,  0, {
     return SPU_STATUS_OK;
 })
 
-DEF_CMD(POP,        2,  0,  1,  0, {
-    if ( _IS_REG )
+DEF_CMD(POP,        2,  0,  1,  0,  0,{
+    if ( _IS_ARG_REG() )
     {
         _REG_T reg = 0;
-        _GET_REG_( &reg );
+        _GET_ARG_REG( &reg );
         _POP(&(_REGISTERS[reg]));
         _IP += 2;
     }
@@ -100,7 +102,7 @@ DEF_CMD(POP,        2,  0,  1,  0, {
     return SPU_STATUS_OK;
 })
 
-DEF_CMD(ADD,        3,  0,  0,  0, {
+DEF_CMD(ADD,        3,  0,  0,  0,  0,{
     _IM_CONST_T a = 0;
     _IM_CONST_T b = 0;
     _POP(&a);
@@ -112,7 +114,7 @@ DEF_CMD(ADD,        3,  0,  0,  0, {
     return SPU_STATUS_OK;
 })
 
-DEF_CMD(SUB,        4,  0,  0,  0, {
+DEF_CMD(SUB,        4,  0,  0,  0,  0,{
     _IM_CONST_T a = 0;
     _IM_CONST_T b = 0;
     _POP(&a);
@@ -124,7 +126,7 @@ DEF_CMD(SUB,        4,  0,  0,  0, {
     return SPU_STATUS_OK;
 })
 
-DEF_CMD(MUL,        5,  0,  0,  0, {
+DEF_CMD(MUL,        5,  0,  0,  0,  0,{
     _IM_CONST_T a = 0;
     _IM_CONST_T b = 0;
     _POP(&a);
@@ -136,7 +138,7 @@ DEF_CMD(MUL,        5,  0,  0,  0, {
     return SPU_STATUS_OK;
 })
 
-DEF_CMD(DIV,        6,  0,  0,  0, {
+DEF_CMD(DIV,        6,  0,  0,  0,  0,{
     _IM_CONST_T a = 0;
     _IM_CONST_T b = 0;
     _POP(&a);
@@ -150,7 +152,7 @@ DEF_CMD(DIV,        6,  0,  0,  0, {
     return SPU_STATUS_OK;
 })
 
-DEF_CMD(IN,         7,  0,  0,  0, {
+DEF_CMD(IN,         7,  0,  0,  0,  0,{
     _PROG_RES_T in = 0;
 
     fprintf(stdout, "Please enter 'in':\n");
@@ -166,7 +168,7 @@ DEF_CMD(IN,         7,  0,  0,  0, {
     return SPU_STATUS_OK;
 })
 
-DEF_CMD(OUT,        8,  0,  0,  0, {
+DEF_CMD(OUT,        8,  0,  0,  0,  0,{
     _IM_CONST_T buf = 0;
     _POP(&buf);
     *_PROG_RES_PTR = _CAST_IM_CONST_TO_PROG_RES( buf );
@@ -176,8 +178,14 @@ DEF_CMD(OUT,        8,  0,  0,  0, {
     return SPU_STATUS_OK;
 })
 
-DEF_CMD(HLT,        9,  0,  0,  0, {
+DEF_CMD(HLT,        9,  0,  0,  0,  0,{
     return SPU_STATUS_HLT;
+})
+
+DEF_CMD(JMP,        10, 0,  0,  0,  1, {
+    _IP = _GET_CS_OFFSET()
+
+    return SPU_STATUS_OK;
 })
 
 //-------------UNDEF DSL--------------
@@ -207,8 +215,8 @@ DEF_CMD(HLT,        9,  0,  0,  0, {
 
 #undef _CHECK_SPU
 #undef _GET_INFO_BYTE
-#undef _IS_IM_CONST
-#undef _IS_REG
-#undef _IS_MEM
-#undef _GET_IM_CONST
-#undef _GET_REG_
+#undef _IS_ARG_IM_CONST()
+#undef _IS_ARG_REG()
+#undef _IS_ARG_MEM()
+#undef _GET_ARG_IM_CONST()
+#undef _GET_ARG_REG

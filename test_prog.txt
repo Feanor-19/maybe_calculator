@@ -1,19 +1,9 @@
 ; some header information
 
-in
-in ; some comment
-add
-
-push 2
-pop rcx
-
-pop rax
-
-push rax
-push rcx
-
-mul
-
-out
+push 19
+label:
+    in
+    pop rax
+    jmp label
 
 hlt

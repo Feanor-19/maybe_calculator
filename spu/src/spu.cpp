@@ -9,7 +9,7 @@ inline void print_elem_t(FILE *stream, Elem_t val) {fprintf(stream, "%d", val);}
 #define STACK_DUMP_ON_INVALID_POP
 #define STACK_USE_PROTECTION_CANARY
 #define STACK_USE_PROTECTION_HASH
-#include "stack.h"
+#include "..\..\common\stack.h"
 
 #include "spu.h"
 
@@ -327,7 +327,7 @@ SPUStatus run_program(SPU *spu_ptr, double *prog_res)
     }
 }
 
-#define DEF_CMD(name, id, is_im_const, is_reg, is_mem, ...)     \
+#define DEF_CMD(name, id, is_im_const, is_reg, is_mem, is_label, ...)     \
     case CMD_##name:                                            \
         __VA_ARGS__                                             \
         break;
@@ -343,7 +343,6 @@ SPUStatus exec_curr_cmd_(SPU *spu_ptr, double *prog_res)
         fprintf(stdout, "Press enter to continue...\n");
         getc(stdin);
     }
-    // TODO - сделать чтобы после исполнения команды in чистился буфер
 
     switch ( spu_ptr->cs[spu_ptr->ip] )
     {
