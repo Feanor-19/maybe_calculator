@@ -14,7 +14,7 @@
             - 4 байта под размер в байтах всего бинарного файла (uint32_t)
         - последовательность комманд, записанных в виде блоков байт переменной длины
             - вид одного блока байт:
-            байт с номером команды, [байт доп информации о команде], [аргумент]
+            байт с номером команды, байт доп информации о команде, [аргумент]
 
             Пояснение:
             - номер команды соответсвует номеру из enum Command и записан как int8_t
@@ -30,6 +30,9 @@
                     - b6            /
                     - b7            пока не используется
 
+                Примечание: если у команды нет аргумента, то байт информации всё равно
+                есть, но он нулевой.
+
             - тип аргумента определяется на основании байта доп информации:
                 включенный бит:         тип аргумента:
 
@@ -37,6 +40,7 @@
                 - register              нет аргумента
                 - memory                ПОКА НЕ РЕАЛИЗОВАНО
                 - cs offset             int32_t
+
 */
 
 typedef int spu_stack_elem_t;
@@ -103,7 +107,7 @@ const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
 //--- BINARY FILE HEADER -----------------------------------------------------------------------------
 const static char SIGN_RAW_[4] = {'S', 'F', '1', '9'};
 const BIN_HEADER_SIGN_t SIGN = *((const BIN_HEADER_SIGN_t*) SIGN_RAW_);
-const BIN_HEADER_VERSION_t VERSION   = 9;
+const BIN_HEADER_VERSION_t VERSION   = 10;
 const size_t HEADER_SIZE_IN_BYTES = sizeof(BIN_HEADER_SIGN_t) + sizeof(BIN_HEADER_VERSION_t) + sizeof(BIN_HEADER_FILE_SIZE_t);
 //----------------------------------------------------------------------------------------------------
 

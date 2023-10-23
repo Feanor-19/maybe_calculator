@@ -28,6 +28,9 @@
 #define _PROG_RES_T     double
 #define _CS_OFFSET_T    cs_offset_t
 
+#define _CMD_BYTE_SIZE  sizeof(int8_t)
+#define _INFO_BYTE_SIZE sizeof(int8_t)
+
 #define _PROG_RES_T_SPECF "%lf"
 
 #define _ADD(a, b) ((a) + (b))
@@ -69,14 +72,14 @@ DEF_CMD(PUSH,       1,  1,  1,  0,  0, {
     if ( _IS_ARG_IM_CONST() )
     {
         _PUSH(_GET_ARG_IM_CONST());
-        _IP += 2 + sizeof(_IM_CONST_T);
+        _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE + sizeof(_IM_CONST_T);
     }
     else if ( _IS_ARG_REG() )
     {
         _REG_T reg = 0;
         _GET_ARG_REG( &reg );
         _PUSH( _REGISTERS[reg] );
-        _IP += 2;
+        _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
     }
     else
     {
@@ -92,7 +95,7 @@ DEF_CMD(POP,        2,  0,  1,  0,  0,{
         _REG_T reg = 0;
         _GET_ARG_REG( &reg );
         _POP(&(_REGISTERS[reg]));
-        _IP += 2;
+        _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
     }
     else
     {
@@ -109,7 +112,7 @@ DEF_CMD(ADD,        3,  0,  0,  0,  0,{
     _POP(&b);
     _PUSH( _ADD(a, b) );
 
-    _IP++;
+    _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
 
     return SPU_STATUS_OK;
 })
@@ -121,7 +124,7 @@ DEF_CMD(SUB,        4,  0,  0,  0,  0,{
     _POP(&b);
     _PUSH( _SUB(b, a) );
 
-    _IP++;
+    _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
 
     return SPU_STATUS_OK;
 })
@@ -133,7 +136,7 @@ DEF_CMD(MUL,        5,  0,  0,  0,  0,{
     _POP(&b);
     _PUSH( _MUL(a,b) );
 
-    _IP++;
+    _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
 
     return SPU_STATUS_OK;
 })
@@ -147,7 +150,7 @@ DEF_CMD(DIV,        6,  0,  0,  0,  0,{
         return SPU_STATUS_ERROR_DIV_BY_ZERO;
     _PUSH( _DIV(a,b) );
 
-    _IP++;
+    _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
 
     return SPU_STATUS_OK;
 })
@@ -163,7 +166,7 @@ DEF_CMD(IN,         7,  0,  0,  0,  0,{
 
     _PUSH( _CAST_PROG_RES_TO_IM_CONST( in ) );
 
-    _IP++;
+    _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
 
     return SPU_STATUS_OK;
 })
@@ -173,7 +176,7 @@ DEF_CMD(OUT,        8,  0,  0,  0,  0,{
     _POP(&buf);
     *_PROG_RES_PTR = _CAST_IM_CONST_TO_PROG_RES( buf );
 
-    _IP++;
+    _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
 
     return SPU_STATUS_OK;
 })
@@ -199,7 +202,7 @@ DEF_CMD(JA,        11, 0,  0,  0,  1, {
     }
     else
     {
-        _IP++;
+        _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE + sizeof(_CS_OFFSET_T);
     }
 
     return SPU_STATUS_OK;
@@ -214,6 +217,10 @@ DEF_CMD(JAE,       12, 0,  0,  0,  1, {
     {
         _IP = _GET_CS_OFFSET();
     }
+    else
+    {
+        _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE + sizeof(_CS_OFFSET_T);
+    }
 
     return SPU_STATUS_OK;
 })
@@ -226,6 +233,10 @@ DEF_CMD(JB,        13, 0,  0,  0,  1, {
     if ( b < a )
     {
         _IP = _GET_CS_OFFSET();
+    }
+    else
+    {
+        _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE + sizeof(_CS_OFFSET_T);
     }
 
     return SPU_STATUS_OK;
@@ -240,6 +251,10 @@ DEF_CMD(JBE,       14, 0,  0,  0,  1, {
     {
         _IP = _GET_CS_OFFSET();
     }
+    else
+    {
+        _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE + sizeof(_CS_OFFSET_T);
+    }
 
     return SPU_STATUS_OK;
 })
@@ -253,6 +268,10 @@ DEF_CMD(JE,        15, 0,  0,  0,  1, {
     {
         _IP = _GET_CS_OFFSET();
     }
+    else
+    {
+        _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE + sizeof(_CS_OFFSET_T);
+    }
 
     return SPU_STATUS_OK;
 })
@@ -265,6 +284,10 @@ DEF_CMD(JNE,       16, 0,  0,  0,  1, {
     if ( b != a )
     {
         _IP = _GET_CS_OFFSET();
+    }
+    else
+    {
+        _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE + sizeof(_CS_OFFSET_T);
     }
 
     return SPU_STATUS_OK;
@@ -282,6 +305,9 @@ DEF_CMD(JNE,       16, 0,  0,  0,  1, {
 #undef _REG_T
 #undef _PROG_RES_T
 #undef _CS_OFFSET_T
+
+#undef _CMD_BYTE_SIZE
+#undef _INFO_BYTE_SIZE
 
 #undef _PROG_RES_T_SPECF
 

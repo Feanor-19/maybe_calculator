@@ -273,18 +273,23 @@ BinOut translate_to_binary(Input input)
         }
 
         bin_arr[bin_arr_ind++] = (int8_t) cmd;
-
+        CmdArg cmd_arg = {};
         if ( can_cmd_have_arg(cmd) )
         {
-            CmdArg cmd_arg = get_arg(cmd, input.text.line_array[ind] + cmd_end);
+            cmd_arg = get_arg(cmd, input.text.line_array[ind] + cmd_end);
             if (cmd_arg.err)
             {
                 bin_out.err = cmd_arg.err;
                 return bin_out;
             }
-
-            handle_cmd_arg(bin_arr, &bin_arr_ind, cmd_arg, &fixup_stk);
         }
+        else
+        {
+            cmd_arg.info_byte = 0x00;
+            cmd_arg.err = ASM_STATUS_OK;
+        }
+
+        handle_cmd_arg(bin_arr, &bin_arr_ind, cmd_arg, &fixup_stk);
     }
 
     AssemblerStatus error = handle_fixup(bin_arr, &fixup_stk, labels);
@@ -331,14 +336,6 @@ inline size_t find_cmd_end( const char *str)
         return cmd_end_char_ptr - str;
 }
 
-/*
-inline char *skip_spaces(char *str)
-{
-    while ( isspace(*str) )
-        str++;
-    return str;
-}
-*/
 Command get_command(char *str, size_t *cmd_end_ptr)
 {
     assert(str);
