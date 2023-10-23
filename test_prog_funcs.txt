@@ -1,0 +1,26 @@
+; some header information
+
+in
+in
+call add_and_square
+push rax
+
+out
+hlt
+
+; pops two numbers from stack and puts their squared sum to rax
+; ATTENTION! rax and rbx are used by this function!
+add_and_square:
+    pop rbx
+
+    add
+    pop rax
+
+    push rax
+    push rax
+    mul
+
+    pop rax
+
+    push rbx
+    ret

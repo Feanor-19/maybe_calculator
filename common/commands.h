@@ -40,6 +40,8 @@
 
 #define _CAST_PROG_RES_TO_IM_CONST( x_ ) ( (_IM_CONST_T) (x_ * COMPUTATIONAL_MULTIPLIER) )
 #define _CAST_IM_CONST_TO_PROG_RES( x_ ) ( ( (_PROG_RES_T) buf ) / COMPUTATIONAL_MULTIPLIER )
+#define _CAST_CS_OFFSET_TO_IM_CONST( x_ ) ( ( _IM_CONST_T ) x_ )
+#define _CAST_IM_CONST_TO_CS_OFFSET( x_ ) ( ( _CS_OFFSET_T ) x_ )
 
 #define _PUSH(x) STACK_FUNC_WRAP(stack_push( &(_SPU->stk), (x) ))
 #define _POP(ptr_to) STACK_FUNC_WRAP(stack_pop( &(_SPU->stk), (ptr_to) ))
@@ -49,7 +51,7 @@
 #define _IS_ARG_IM_CONST() test_bit(_GET_INFO_BYTE, BIT_IMMEDIATE_CONST)
 #define _IS_ARG_REG() test_bit(_GET_INFO_BYTE, BIT_REGISTER)
 #define _IS_ARG_MEM() test_bit(_GET_INFO_BYTE, BIT_MEMORY)
-#define _GET_ARG_IM_CONST()  *((_IM_CONST_T *) (_CS + _IP + 2))
+#define _GET_ARG_IM_CONST()  *((_IM_CONST_T *) (_CS + _IP + _CMD_BYTE_SIZE + _INFO_BYTE_SIZE))
 #define _GET_ARG_REG(REG_PTR_) do                                               \
 {                                                                           \
     *REG_PTR_ = 0;                                                          \
@@ -59,7 +61,7 @@
             (*REG_PTR_) = set_bit( (*REG_PTR_), bit - BIT_REG_ID_START);    \
     }                                                                       \
 } while (0)
-#define _GET_CS_OFFSET() *((_CS_OFFSET_T *) (_CS + _IP + 2))
+#define _GET_CS_OFFSET() *((_CS_OFFSET_T *) (_CS + _IP + _CMD_BYTE_SIZE + _INFO_BYTE_SIZE))
 #define _CLEAR_IN_BUF() while( getc(stdin) != '\n' )                                                             \
 
 //---------------CMD------------------
@@ -293,6 +295,25 @@ DEF_CMD(JNE,       16, 0,  0,  0,  1, {
     return SPU_STATUS_OK;
 })
 
+DEF_CMD(CALL,       17, 0, 0, 0, 1, {
+    _PUSH( _CAST_CS_OFFSET_TO_IM_CONST(_IP + _CMD_BYTE_SIZE + _INFO_BYTE_SIZE + sizeof(_CS_OFFSET_T)) );
+
+    _IP = _GET_CS_OFFSET();
+
+    return SPU_STATUS_OK;
+})
+
+DEF_CMD(RET,        18, 0, 0, 0, 0, {
+    _IM_CONST_T dest_raw = 0;
+    _POP( &dest_raw );
+
+    _CS_OFFSET_T dest = _CAST_IM_CONST_TO_CS_OFFSET( dest_raw );
+
+    _IP = dest;
+
+    return SPU_STATUS_OK;
+})
+
 //-------------UNDEF DSL--------------
 
 #undef _SPU
@@ -318,6 +339,8 @@ DEF_CMD(JNE,       16, 0,  0,  0,  1, {
 
 #undef _CAST_PROG_RES_TO_IM_CONST
 #undef _CAST_IM_CONST_TO_PROG_RES
+#undef _CAST_CS_OFFSET_TO_IM_CONST
+#undef _CAST_IM_CONST_TO_CS_OFFSET
 
 #undef _PUSH
 #undef _POP

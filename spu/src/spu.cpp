@@ -42,7 +42,7 @@ int main(int argc, const char *argv[])
 }
 
 //! @brief Checks given header and writes size of code in bytes to *cs_size.
-inline SPUStatus check_header_(char *input_file_header, size_t *cs_size)
+inline SPUStatus check_header_(char *input_file_header, cs_offset_t *cs_size)
 {
     assert(input_file_header);
     assert(cs_size);
@@ -57,7 +57,7 @@ inline SPUStatus check_header_(char *input_file_header, size_t *cs_size)
 
     input_file_header += sizeof(BIN_HEADER_VERSION_t);
 
-    *cs_size = (size_t) *((BIN_HEADER_FILE_SIZE_t *) input_file_header) - HEADER_SIZE_IN_BYTES;
+    *cs_size = (cs_offset_t) *((BIN_HEADER_FILE_SIZE_t *) input_file_header) - HEADER_SIZE_IN_BYTES;
 
     return SPU_STATUS_OK;
 }
@@ -88,7 +88,7 @@ inline SPUStatus load_prog_into_spu_(SPU *spu_ptr, const char *input_file_name)
         return SPU_STATUS_ERROR_INP_FILE_HEADER_CORRUPTED;
     }
 
-    size_t cs_size = 0;
+    cs_offset_t cs_size = 0;
     SPUStatus err = check_header_(input_file_header, &cs_size);
     if (cs_size == 0 || err)
     {
@@ -154,7 +154,7 @@ SPUStatus SPU_dtor(SPU* spu_ptr)
     }
 
     if (spu_ptr->cs) free(spu_ptr->cs);
-    spu_ptr->cs_size = (size_t) -1;
+    spu_ptr->cs_size = (cs_offset_t) -1;
 
     return SPU_STATUS_OK;
 }
@@ -172,7 +172,7 @@ int SPU_verificator(SPU* spu_ptr)
     if ( spu_ptr && !spu_ptr->cs )
         error |= SPU_VERIFY_CS_PTR_NULL;
 
-    if ( spu_ptr && spu_ptr->cs_size > ((size_t) -10) )
+    if ( spu_ptr && spu_ptr->cs_size > ((cs_offset_t) -10) )
         error |= SPU_VERIFY_CS_SIZE_TOO_BIG;
 
     if ( spu_ptr && spu_ptr->ip >= spu_ptr->cs_size )
@@ -263,7 +263,7 @@ inline void print_spu_header_and_cs_(SPU *spu_ptr)
                 break;
 
             fprintf(stderr, "%02X ", (unsigned char) spu_ptr->cs[ind]);
-            if (ind == spu_ptr->ip)
+            if ((cs_offset_t) ind == spu_ptr->ip)
                 col_of_ip_on_this_row = col;
         }
         putc('\n', stderr);
@@ -289,7 +289,7 @@ void SPU_dump_( SPU* spu_ptr,
     print_spu_verify_res_( verify_res != 0 ? verify_res : SPU_verificator(spu_ptr) );
     print_spu_registers_(spu_ptr);
 
-    fprintf(stderr, "ip: <%llu>\n", spu_ptr->ip);
+    fprintf(stderr, "ip: <%u>\n", spu_ptr->ip);
 
     if (spu_ptr->cs)
     {

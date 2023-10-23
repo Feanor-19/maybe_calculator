@@ -60,8 +60,8 @@ struct SPU
     int registers[num_of_registers] = {};
 
     char *cs = NULL;
-    size_t cs_size = 0;
-    size_t ip = 0;
+    cs_offset_t cs_size = 0;
+    cs_offset_t ip = 0;
 
     int debug_mode = 0;
 };

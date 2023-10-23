@@ -47,7 +47,7 @@ typedef int spu_stack_elem_t;
 //TODO - добавить prog_res_t = double
 
 typedef int32_t immediate_const_t;
-typedef int32_t cs_offset_t; //!< jmp cmd argument
+typedef uint32_t cs_offset_t; //!< jmp cmd argument
 
 typedef int32_t BIN_HEADER_SIGN_t;
 typedef uint8_t BIN_HEADER_VERSION_t;
@@ -107,8 +107,8 @@ const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
 //--- BINARY FILE HEADER -----------------------------------------------------------------------------
 const static char SIGN_RAW_[4] = {'S', 'F', '1', '9'};
 const BIN_HEADER_SIGN_t SIGN = *((const BIN_HEADER_SIGN_t*) SIGN_RAW_);
-const BIN_HEADER_VERSION_t VERSION   = 10;
-const size_t HEADER_SIZE_IN_BYTES = sizeof(BIN_HEADER_SIGN_t) + sizeof(BIN_HEADER_VERSION_t) + sizeof(BIN_HEADER_FILE_SIZE_t);
+const BIN_HEADER_VERSION_t VERSION   = 11;
+const BIN_HEADER_FILE_SIZE_t HEADER_SIZE_IN_BYTES = sizeof(BIN_HEADER_SIGN_t) + sizeof(BIN_HEADER_VERSION_t) + sizeof(BIN_HEADER_FILE_SIZE_t);
 //----------------------------------------------------------------------------------------------------
 
 const spu_stack_elem_t COMPUTATIONAL_MULTIPLIER = 1000;

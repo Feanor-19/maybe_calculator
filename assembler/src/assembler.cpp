@@ -341,8 +341,6 @@ Command get_command(char *str, size_t *cmd_end_ptr)
     assert(str);
     assert(cmd_end_ptr);
 
-    //str = skip_spaces(str); // TODO - должно быть не тут... иначе cmd_end врет
-
     *cmd_end_ptr = find_cmd_end(str);
     int space_was_changed_to_zero = 0;
     if ( str[*cmd_end_ptr] == ' ' )
