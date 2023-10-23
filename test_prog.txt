@@ -1,9 +1,14 @@
 ; some header information
 
-push 19
-label:
-    in
+push 0
+iter:
+    push 1
+    add
     pop rax
-    jmp label
+    push rax
 
+    push rax
+    push 5
+    jb iter
+out
 hlt

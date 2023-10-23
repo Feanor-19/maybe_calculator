@@ -1,7 +1,8 @@
 #ifndef SPU_H
 #define SPU_H
 
-#include "stdint.h"
+#include <stdint.h>
+#include <math.h>
 
 #include "../../common/onegin.h"
 #include "../../common/common.h"

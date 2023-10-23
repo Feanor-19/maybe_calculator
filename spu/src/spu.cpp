@@ -242,7 +242,8 @@ inline void print_spu_header_and_cs_(SPU *spu_ptr)
 
     const size_t row_width = 16;
 
-    size_t rows_count = (spu_ptr->cs_size + HEADER_SIZE_IN_BYTES) / row_width + ( spu_ptr->cs_size % row_width != 0 );
+    size_t full_bin_file_size = spu_ptr->cs_size + HEADER_SIZE_IN_BYTES;
+    size_t rows_count = full_bin_file_size / row_width + ( full_bin_file_size % row_width != 0 );
     size_t ind = 0;
     for (size_t row = 0; row < rows_count; row++ )
     {
@@ -261,7 +262,7 @@ inline void print_spu_header_and_cs_(SPU *spu_ptr)
             if ( ind >= spu_ptr->cs_size )
                 break;
 
-            fprintf(stderr, "%02X ", (char) spu_ptr->cs[ind]);
+            fprintf(stderr, "%02X ", (unsigned char) spu_ptr->cs[ind]);
             if (ind == spu_ptr->ip)
                 col_of_ip_on_this_row = col;
         }

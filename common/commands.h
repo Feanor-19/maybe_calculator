@@ -183,7 +183,89 @@ DEF_CMD(HLT,        9,  0,  0,  0,  0,{
 })
 
 DEF_CMD(JMP,        10, 0,  0,  0,  1, {
-    _IP = _GET_CS_OFFSET()
+    _IP = _GET_CS_OFFSET();
+
+    return SPU_STATUS_OK;
+})
+
+DEF_CMD(JA,        11, 0,  0,  0,  1, {
+    _IM_CONST_T a = 0;
+    _IM_CONST_T b = 0;
+    _POP(&a);
+    _POP(&b);
+    if ( b > a )
+    {
+        _IP = _GET_CS_OFFSET();
+    }
+    else
+    {
+        _IP++;
+    }
+
+    return SPU_STATUS_OK;
+})
+
+DEF_CMD(JAE,       12, 0,  0,  0,  1, {
+    _IM_CONST_T a = 0;
+    _IM_CONST_T b = 0;
+    _POP(&a);
+    _POP(&b);
+    if ( b >= a )
+    {
+        _IP = _GET_CS_OFFSET();
+    }
+
+    return SPU_STATUS_OK;
+})
+
+DEF_CMD(JB,        13, 0,  0,  0,  1, {
+    _IM_CONST_T a = 0;
+    _IM_CONST_T b = 0;
+    _POP(&a);
+    _POP(&b);
+    if ( b < a )
+    {
+        _IP = _GET_CS_OFFSET();
+    }
+
+    return SPU_STATUS_OK;
+})
+
+DEF_CMD(JBE,       14, 0,  0,  0,  1, {
+    _IM_CONST_T a = 0;
+    _IM_CONST_T b = 0;
+    _POP(&a);
+    _POP(&b);
+    if ( b <= a )
+    {
+        _IP = _GET_CS_OFFSET();
+    }
+
+    return SPU_STATUS_OK;
+})
+
+DEF_CMD(JE,        15, 0,  0,  0,  1, {
+    _IM_CONST_T a = 0;
+    _IM_CONST_T b = 0;
+    _POP(&a);
+    _POP(&b);
+    if ( b == a )
+    {
+        _IP = _GET_CS_OFFSET();
+    }
+
+    return SPU_STATUS_OK;
+})
+
+DEF_CMD(JNE,       16, 0,  0,  0,  1, {
+    _IM_CONST_T a = 0;
+    _IM_CONST_T b = 0;
+    _POP(&a);
+    _POP(&b);
+    if ( b != a )
+    {
+        _IP = _GET_CS_OFFSET();
+    }
 
     return SPU_STATUS_OK;
 })
@@ -199,6 +281,7 @@ DEF_CMD(JMP,        10, 0,  0,  0,  1, {
 #undef _IM_CONST_T
 #undef _REG_T
 #undef _PROG_RES_T
+#undef _CS_OFFSET_T
 
 #undef _PROG_RES_T_SPECF
 
@@ -215,8 +298,10 @@ DEF_CMD(JMP,        10, 0,  0,  0,  1, {
 
 #undef _CHECK_SPU
 #undef _GET_INFO_BYTE
-#undef _IS_ARG_IM_CONST()
-#undef _IS_ARG_REG()
-#undef _IS_ARG_MEM()
-#undef _GET_ARG_IM_CONST()
+#undef _IS_ARG_IM_CONST
+#undef _IS_ARG_REG
+#undef _IS_ARG_MEM
+#undef _GET_ARG_IM_CONST
 #undef _GET_ARG_REG
+#undef _GET_CS_OFFSET
+#undef _CLEAR_IN_BUF
