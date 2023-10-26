@@ -224,14 +224,6 @@ inline void print_header_bytes_(const BIN_HEADER_SIGN_t sign,
     }
 }
 
-inline void put_n_chars(FILE *stream, size_t n, char c)
-{
-    while (n--)
-    {
-        putc(c, stream);
-    }
-}
-
 inline void print_spu_header_and_cs_(SPU *spu_ptr)
 {
     assert(spu_ptr);
@@ -277,6 +269,20 @@ inline void print_spu_header_and_cs_(SPU *spu_ptr)
     fprintf(stderr, "}\n");
 }
 
+inline void print_spu_memory_(SPU *spu_ptr)
+{
+    fprintf(stderr, "MEMORY:\n");
+
+    //TODO - фиксированная ширина печати (количество столбцов)
+    int width = find_maximum_elem_width( spu_ptr->memory, MEMORY_SIZE );
+
+    for (size_t ind = 0; ind < MEMORY_SIZE; ind++)
+    {
+        fprintf(stderr, "%*d ", width, spu_ptr->memory[ind] );
+    }
+    fprintf(stderr, "\n");
+}
+
 void SPU_dump_( SPU* spu_ptr,
                     const char* file_name,
                     int line,
@@ -288,6 +294,7 @@ void SPU_dump_( SPU* spu_ptr,
 
     print_spu_verify_res_( verify_res != 0 ? verify_res : SPU_verificator(spu_ptr) );
     print_spu_registers_(spu_ptr);
+    print_spu_memory_(spu_ptr);
 
     fprintf(stderr, "ip: <%u>\n", spu_ptr->ip);
 
@@ -328,9 +335,9 @@ SPUStatus run_program(SPU *spu_ptr, double *prog_res)
     }
 }
 
-#define DEF_CMD(name, id, is_im_const, is_reg, is_mem, is_label, ...)     \
-    case CMD_##name:                                            \
-        __VA_ARGS__                                             \
+#define DEF_CMD(name, id, is_im_const, is_reg, is_mem, is_label, ...)       \
+    case CMD_##name:                                                        \
+        __VA_ARGS__                                                         \
         break;
 
 SPUStatus exec_curr_cmd_(SPU *spu_ptr, double *prog_res)

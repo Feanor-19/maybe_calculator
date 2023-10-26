@@ -1,14 +1,17 @@
 ; some header information
 
-push 0
-iter:
-    push 1
-    add
-    pop rax
-    push rax
+push 5
+pop rbx
 
-    push rax
-    push 5
-    jb iter
+push 19
+pop [2]
+
+push 42
+pop [rbx]
+
+push [2]
+push [rbx]
+add
+
 out
 hlt

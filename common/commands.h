@@ -22,11 +22,13 @@
 #define _CS spu_ptr->cs
 #define _REGISTERS spu_ptr->registers
 #define _PROG_RES_PTR prog_res
+#define _MEMORY spu_ptr->memory
 
 #define _IM_CONST_T     spu_stack_elem_t
 #define _REG_T          uint8_t
 #define _PROG_RES_T     double
 #define _CS_OFFSET_T    cs_offset_t
+#define _MEMORY_T       uint32_t
 
 #define _CMD_BYTE_SIZE  sizeof(int8_t)
 #define _INFO_BYTE_SIZE sizeof(int8_t)
@@ -42,6 +44,7 @@
 #define _CAST_IM_CONST_TO_PROG_RES( x_ ) ( ( (_PROG_RES_T) buf ) / COMPUTATIONAL_MULTIPLIER )
 #define _CAST_CS_OFFSET_TO_IM_CONST( x_ ) ( ( _IM_CONST_T ) x_ )
 #define _CAST_IM_CONST_TO_CS_OFFSET( x_ ) ( ( _CS_OFFSET_T ) x_ )
+#define _CAST_IM_CONST_TO_MEMORY_T( x_ ) ( (_MEMORY_T) ( x_ / COMPUTATIONAL_MULTIPLIER ) )
 
 #define _PUSH(x) STACK_FUNC_WRAP(stack_push( &(_SPU->stk), (x) ))
 #define _POP(ptr_to) STACK_FUNC_WRAP(stack_pop( &(_SPU->stk), (ptr_to) ))
@@ -52,7 +55,7 @@
 #define _IS_ARG_REG() test_bit(_GET_INFO_BYTE, BIT_REGISTER)
 #define _IS_ARG_MEM() test_bit(_GET_INFO_BYTE, BIT_MEMORY)
 #define _GET_ARG_IM_CONST()  *((_IM_CONST_T *) (_CS + _IP + _CMD_BYTE_SIZE + _INFO_BYTE_SIZE))
-#define _GET_ARG_REG(REG_PTR_) do                                               \
+#define _GET_ARG_REG(REG_PTR_) do                                           \
 {                                                                           \
     *REG_PTR_ = 0;                                                          \
     for ( _REG_T bit = BIT_REG_ID_START; bit <= BIT_REG_ID_END; bit++ )     \
@@ -70,17 +73,31 @@ DEF_CMD(UNKNOWN,    0,  0,  0,  0,  0, {
     return SPU_STATUS_ERROR_UNKNOWN_CMD;
 })
 
-DEF_CMD(PUSH,       1,  1,  1,  0,  0, {
+DEF_CMD(PUSH,       1,  1,  1,  1,  0, {
     if ( _IS_ARG_IM_CONST() )
     {
-        _PUSH(_GET_ARG_IM_CONST());
+        if (_IS_ARG_MEM())
+        {
+            _PUSH(_MEMORY[ _CAST_IM_CONST_TO_MEMORY_T( _GET_ARG_IM_CONST() ) ]);
+        }
+        else
+        {
+            _PUSH(_GET_ARG_IM_CONST());
+        }
         _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE + sizeof(_IM_CONST_T);
     }
     else if ( _IS_ARG_REG() )
     {
         _REG_T reg = 0;
         _GET_ARG_REG( &reg );
-        _PUSH( _REGISTERS[reg] );
+        if ( _IS_ARG_MEM() )
+        {
+            _PUSH( _MEMORY[ _CAST_IM_CONST_TO_MEMORY_T( _REGISTERS[reg] ) ] );
+        }
+        else
+        {
+            _PUSH( _REGISTERS[reg] );
+        }
         _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
     }
     else
@@ -91,13 +108,26 @@ DEF_CMD(PUSH,       1,  1,  1,  0,  0, {
     return SPU_STATUS_OK;
 })
 
-DEF_CMD(POP,        2,  0,  1,  0,  0,{
+DEF_CMD(POP,        2,  0,  1,  1,  0,{
     if ( _IS_ARG_REG() )
     {
         _REG_T reg = 0;
         _GET_ARG_REG( &reg );
-        _POP(&(_REGISTERS[reg]));
+        if ( _IS_ARG_MEM() )
+        {
+            _POP( &(_MEMORY[ _CAST_IM_CONST_TO_MEMORY_T( _REGISTERS[reg] ) ]) );
+        }
+        else
+        {
+            _POP( &(_REGISTERS[reg]) );
+        }
         _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
+    }
+    else if ( _IS_ARG_MEM() && _IS_ARG_IM_CONST() )
+    {
+        _POP( &_MEMORY[ _CAST_IM_CONST_TO_MEMORY_T( _GET_ARG_IM_CONST() ) ] );
+
+        _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE + sizeof(_IM_CONST_T);
     }
     else
     {
@@ -321,6 +351,7 @@ DEF_CMD(RET,        18, 0, 0, 0, 0, {
 #undef _CS
 #undef _REGISTERS
 #undef _PROG_RES_PTR
+#undef _MEMORY
 
 #undef _IM_CONST_T
 #undef _REG_T

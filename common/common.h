@@ -23,7 +23,7 @@
 
                     - b0            immediate const
                     - b1            register
-                    - b2            memory
+                    - b2            memory !Примечание: не имеет смысла само по себе! нужны b0/b1
                     - b3            cs offset (смещение от начала сегмента с кодом)
                     - b4            \
                     - b5            } номер регистра := b3 + b4*2 + b5*4
@@ -38,16 +38,17 @@
 
                 - immediate const       int32_t
                 - register              нет аргумента
-                - memory                ПОКА НЕ РЕАЛИЗОВАНО
-                - cs offset             int32_t
+                - memory                зависит от того, какие биты ещё включены (im_const/register)
+                - cs offset             uint32_t
 
 */
 
 typedef int spu_stack_elem_t;
 //TODO - добавить prog_res_t = double
 
-typedef int32_t immediate_const_t;
+typedef int32_t immediate_const_t; //TODO - исправить путаницу между im_const и spu_stack_elem_t
 typedef uint32_t cs_offset_t; //!< jmp cmd argument
+// typedef uint32_t memory_t; // кажется этого не нужно
 
 typedef int32_t BIN_HEADER_SIGN_t;
 typedef uint8_t BIN_HEADER_VERSION_t;
@@ -94,6 +95,14 @@ const int command_needs_register_arg[] =
 };
 #undef DEF_CMD
 
+#define DEF_CMD(name, id, is_im_const, is_reg, is_mem, is_label, ...) is_mem,
+const int command_needs_memory_arg[] =
+{
+    #include "commands.h"
+    0 // FICTIONAL_CMD!
+};
+#undef DEF_CMD
+
 #define DEF_CMD(name, id, is_im_const, is_reg, is_mem, is_label, ...) is_label,
 const int command_needs_label_arg[] =
 {
@@ -107,12 +116,13 @@ const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
 //--- BINARY FILE HEADER -----------------------------------------------------------------------------
 const static char SIGN_RAW_[4] = {'S', 'F', '1', '9'};
 const BIN_HEADER_SIGN_t SIGN = *((const BIN_HEADER_SIGN_t*) SIGN_RAW_);
-const BIN_HEADER_VERSION_t VERSION   = 11;
+const BIN_HEADER_VERSION_t VERSION   = 12;
 const BIN_HEADER_FILE_SIZE_t HEADER_SIZE_IN_BYTES = sizeof(BIN_HEADER_SIGN_t) + sizeof(BIN_HEADER_VERSION_t) + sizeof(BIN_HEADER_FILE_SIZE_t);
 //----------------------------------------------------------------------------------------------------
 
 const spu_stack_elem_t COMPUTATIONAL_MULTIPLIER = 1000;
 const cs_offset_t CS_OFFSET_POISON_VALUE = -1;
+const size_t MEMORY_SIZE = 128;
 
 //----------------------------------------------------------------------------------------------------
 
@@ -129,13 +139,6 @@ const char registers_names[][register_name_len + 1] =
 const size_t num_of_registers = sizeof(registers_names)/sizeof(registers_names[0]);
 //-------------------------------------------------------------------------------------------------------
 
-#define sizearr(arr) sizeof(arr)/sizeof(arr[0])
-
-static_assert(sizearr(command_needs_im_const_arg) == sizearr(command_needs_register_arg),
-                "command_needs_im_const_arg's and command_needs_register_arg's sizes are not equal!");
-
 static_assert(sizeof(SIGN_RAW_) == sizeof(BIN_HEADER_SIGN_t), "SIGN must be as long as int is!");
-
-#undef sizearr
 
 #endif /* COMMON_H */

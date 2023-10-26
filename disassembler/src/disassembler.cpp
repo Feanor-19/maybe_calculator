@@ -3,22 +3,15 @@
 
 #include "disassembler.h"
 
-int f(int x)
-{
-    static int j = 0;
-    if (x >=0 )
-    {
-        j += x;
-    }
-    return j;
-}
-
 int main()
 {
-    printf("<%d>\n", f(0));
-    printf("<%d>\n", f(1));
-    printf("<%d>\n", f(2));
-    printf("<%d>\n", f(0));
-    printf("<%d>\n", f(19));
+    char inp[10] = "";
+
+    const char *str = "rax";
+    if (sscanf(str, " [ %[^]] ] ", inp) != 1)
+        printf("NO\n");
+    else
+        printf("%s\n", inp);
+
     return 0;
 }

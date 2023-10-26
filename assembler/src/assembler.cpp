@@ -145,6 +145,7 @@ inline int can_cmd_have_arg(Command cmd)
 {
     return command_needs_im_const_arg[(int) cmd]
         || command_needs_register_arg[(int) cmd]
+        ||   command_needs_memory_arg[(int) cmd]
         ||    command_needs_label_arg[(int) cmd];
 }
 
@@ -409,6 +410,8 @@ CmdArg get_arg(Command cmd, const char *arg)
         cmd_arg.info_byte = set_bit( cmd_arg.info_byte, BIT_IMMEDIATE_CONST );
         cmd_arg.im_const = (immediate_const_t) (immediate_const_raw * COMPUTATIONAL_MULTIPLIER);
         cmd_arg.err = ASM_STATUS_OK;
+
+        return cmd_arg;
     }
     else if ( command_needs_register_arg[(int) cmd]
             && sscanf(arg, "%s", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) != -1 )
@@ -416,17 +419,40 @@ CmdArg get_arg(Command cmd, const char *arg)
         cmd_arg.info_byte = set_bit( cmd_arg.info_byte, BIT_REGISTER ) ;
         cmd_arg.info_byte = write_reg_to_info_byte( cmd_arg.info_byte, reg_id );
         cmd_arg.err = ASM_STATUS_OK;
+
+        return cmd_arg;
+    }
+    else if ( command_needs_memory_arg[(int) cmd] )
+    {
+        if ( sscanf(arg, " [ %lf ] ", &immediate_const_raw) == 1 )
+        {
+            cmd_arg.info_byte = set_bit( cmd_arg.info_byte, BIT_MEMORY );
+            cmd_arg.info_byte = set_bit( cmd_arg.info_byte, BIT_IMMEDIATE_CONST );
+            cmd_arg.im_const = (immediate_const_t) (immediate_const_raw * COMPUTATIONAL_MULTIPLIER);
+            cmd_arg.err = ASM_STATUS_OK;
+
+            return cmd_arg;
+        }
+        else if ( sscanf(arg, " [ %[^]] ] ", rgstr) == 1 && (reg_id = check_reg_name(rgstr)) != -1 )
+        {
+            cmd_arg.info_byte = set_bit( cmd_arg.info_byte, BIT_MEMORY );
+            cmd_arg.info_byte = set_bit( cmd_arg.info_byte, BIT_REGISTER );
+            cmd_arg.info_byte = write_reg_to_info_byte( cmd_arg.info_byte, reg_id);
+            cmd_arg.err = ASM_STATUS_OK;
+
+            return cmd_arg;
+        }
     }
     else if ( command_needs_label_arg[(int) cmd]
             && sscanf(arg, "%s", cmd_arg.label_name) == 1 )
     {
         cmd_arg.info_byte = set_bit(cmd_arg.info_byte, BIT_CS_OFFSET);
         cmd_arg.err = ASM_STATUS_OK;
+
+        return cmd_arg;
     }
-    else
-    {
-        cmd_arg.err = ASM_STATUS_ERROR_CMD_ARG;
-    }
+
+    cmd_arg.err = ASM_STATUS_ERROR_CMD_ARG;
 
     return cmd_arg;
 }

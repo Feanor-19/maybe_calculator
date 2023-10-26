@@ -63,6 +63,8 @@ struct SPU
     cs_offset_t cs_size = 0;
     cs_offset_t ip = 0;
 
+    spu_stack_elem_t memory[MEMORY_SIZE] = {};
+
     int debug_mode = 0;
 };
 
@@ -126,7 +128,6 @@ void print_spu_verify_res_(int verify_res);
 SPUStatus run_program(SPU *spu_ptr, double *prog_res);
 
 //! @brief Executes command at which ip points to
-//! and moves ip.
 SPUStatus exec_curr_cmd_(SPU *spu_ptr, double *prog_res);
 
 //! @note BE VERY CAREFUL USING THIS! MAYBE NOT ALL STACK
