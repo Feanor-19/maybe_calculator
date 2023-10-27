@@ -269,7 +269,7 @@ BinOut translate_to_binary(Input input)
         {
             print_translation_error(ind + 1, input.text.line_array[ind]);
             free(bin_arr);
-            bin_out.err = ASM_STATUS_ERROR_UNKOWN_COMMAND;
+            bin_out.err = ASM_STATUS_ERROR_UNKNOWN_COMMAND;
             return bin_out;
         }
 

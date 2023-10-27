@@ -9,6 +9,8 @@
 #include "../../common/utils.h"
 
 //TODO - переделать на кодогенерацию
+
+/*
 const char* spu_status_messages[] =
 {
     "SPU_STATUS_OK",
@@ -51,6 +53,23 @@ enum SPUStatus
     SPU_STATUS_ERROR_WRONG_IN                   = 15,
     SPU_STATUS_ERROR_DIV_BY_ZERO                = 16,
 };
+*/
+
+#define DEF_STATUS(name, id, message) SPU_STjATUS_##name = id,
+enum SPUStatus
+{
+    #include "spu_statuses.h"
+};
+#undef DEF_STATUS
+
+#define DEF_STATUS(name, id, message) message,
+const char *spu_status_messages[] =
+{
+    #include "spu_statuses.h"
+    "FICTIONAL MESSAGE!"
+};
+#undef DEF_STATUS
+
 
 struct SPU
 {
