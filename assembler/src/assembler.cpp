@@ -394,7 +394,7 @@ CmdArg get_arg(Command cmd, const char *arg)
 
     CmdArg cmd_arg = {};
 
-    double immediate_const_raw = 0;
+    extern_num_t immediate_const_raw = 0;
     char rgstr[register_name_len + 1] = "";
     int reg_id = 0;
 

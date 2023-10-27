@@ -8,6 +8,7 @@
 #include "../../common/common.h"
 #include "../../common/utils.h"
 
+//TODO - переделать на кодогенерацию
 const char* spu_status_messages[] =
 {
     "SPU_STATUS_OK",
@@ -28,8 +29,6 @@ const char* spu_status_messages[] =
     "SPU_STATUS_ERROR_WRONG_IN"
 };
 
-// TODO - добавить SPU_STATUS_WARNING и SPU_STATUS_FATAL
-// для определения критичности ошибки
 enum SPUStatus
 {
     SPU_STATUS_OK                               =  0,
@@ -125,10 +124,10 @@ void print_spu_error(SPUStatus err);
 
 void print_spu_verify_res_(int verify_res);
 
-SPUStatus run_program(SPU *spu_ptr, double *prog_res);
+SPUStatus run_program(SPU *spu_ptr, extern_num_t *prog_res);
 
 //! @brief Executes command at which ip points to
-SPUStatus exec_curr_cmd_(SPU *spu_ptr, double *prog_res);
+SPUStatus exec_curr_cmd_(SPU *spu_ptr, extern_num_t *prog_res);
 
 //! @note BE VERY CAREFUL USING THIS! MAYBE NOT ALL STACK
 //! FUNCTIONS RETURN STACK_ERROR, ALSO BE AWARE THAT

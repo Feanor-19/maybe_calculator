@@ -196,7 +196,7 @@ inline DisasmStatus print_curr_cmd_arg(Binary *binary_ptr, Output *out_ptr)
         }
         else
         {
-            WRITE(out_ptr, "%lf", ((double) im_const_raw) / COMPUTATIONAL_MULTIPLIER );
+            WRITE(out_ptr, "%lf", ((extern_num_t) im_const_raw) / COMPUTATIONAL_MULTIPLIER );
         }
         binary_ptr->ip += sizeof(immediate_const_t);
     }

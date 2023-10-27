@@ -32,7 +32,7 @@ int main(int argc, const char *argv[])
     spu_err = SPU_ctor(&spu, cfg);
     PRINT_IF_SPU_ERROR_(spu_err);
 
-    double prog_res = -1;
+    extern_num_t prog_res = -1;
     run_program(&spu, &prog_res);
     printf("Result of the program: <%lf>", prog_res);
 
@@ -271,14 +271,19 @@ inline void print_spu_header_and_cs_(SPU *spu_ptr)
 
 inline void print_spu_memory_(SPU *spu_ptr)
 {
+    assert(spu_ptr);
+
     fprintf(stderr, "MEMORY:\n");
 
-    //TODO - фиксированная ширина печати (количество столбцов)
-    int width = find_maximum_elem_width( spu_ptr->memory, MEMORY_SIZE );
+    const size_t max_num_of_cols = 8;
+    int elem_width = find_maximum_elem_width( spu_ptr->memory, MEMORY_SIZE );
 
     for (size_t ind = 0; ind < MEMORY_SIZE; ind++)
     {
-        fprintf(stderr, "%*d ", width, spu_ptr->memory[ind] );
+        if ( ind != 0 && ind % max_num_of_cols == 0 )
+            putc('\n', stderr);
+
+        fprintf(stderr, "%*d ", elem_width, spu_ptr->memory[ind] );
     }
     fprintf(stderr, "\n");
 }
@@ -316,7 +321,7 @@ void print_spu_error(SPUStatus err)
     fprintf(stderr, "SPU ERROR: <%s>\n", spu_status_messages[(int) err]);
 }
 
-SPUStatus run_program(SPU *spu_ptr, double *prog_res)
+SPUStatus run_program(SPU *spu_ptr, extern_num_t *prog_res)
 {
     SPU_CHECK(spu_ptr);
     assert(prog_res);
@@ -340,7 +345,7 @@ SPUStatus run_program(SPU *spu_ptr, double *prog_res)
         __VA_ARGS__                                                         \
         break;
 
-SPUStatus exec_curr_cmd_(SPU *spu_ptr, double *prog_res)
+SPUStatus exec_curr_cmd_(SPU *spu_ptr, extern_num_t *prog_res)
 {
     SPU_CHECK(spu_ptr);
     assert(prog_res);

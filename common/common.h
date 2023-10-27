@@ -44,7 +44,8 @@
 */
 
 typedef int spu_stack_elem_t;
-//TODO - добавить prog_res_t = double
+// такой тип имеет результат программы и числовые константы (не адреса) в коде программ
+typedef double extern_num_t;
 
 typedef int32_t immediate_const_t; //TODO - исправить путаницу между im_const и spu_stack_elem_t
 typedef uint32_t cs_offset_t; //!< jmp cmd argument

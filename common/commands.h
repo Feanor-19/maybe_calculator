@@ -26,7 +26,7 @@
 
 #define _IM_CONST_T     spu_stack_elem_t
 #define _REG_T          uint8_t
-#define _PROG_RES_T     double
+#define _EXTERN_NUM_T     extern_num_t
 #define _CS_OFFSET_T    cs_offset_t
 #define _MEMORY_T       uint32_t
 
@@ -41,7 +41,7 @@
 #define _MUL(a, b) ( ((a) * (b)) / COMPUTATIONAL_MULTIPLIER)
 
 #define _CAST_PROG_RES_TO_IM_CONST( x_ ) ( (_IM_CONST_T) (x_ * COMPUTATIONAL_MULTIPLIER) )
-#define _CAST_IM_CONST_TO_PROG_RES( x_ ) ( ( (_PROG_RES_T) buf ) / COMPUTATIONAL_MULTIPLIER )
+#define _CAST_IM_CONST_TO_PROG_RES( x_ ) ( ( (_EXTERN_NUM_T) buf ) / COMPUTATIONAL_MULTIPLIER )
 #define _CAST_CS_OFFSET_TO_IM_CONST( x_ ) ( ( _IM_CONST_T ) x_ )
 #define _CAST_IM_CONST_TO_CS_OFFSET( x_ ) ( ( _CS_OFFSET_T ) x_ )
 #define _CAST_IM_CONST_TO_MEMORY_T( x_ ) ( (_MEMORY_T) ( x_ / COMPUTATIONAL_MULTIPLIER ) )
@@ -188,7 +188,7 @@ DEF_CMD(DIV,        6,  0,  0,  0,  0,{
 })
 
 DEF_CMD(IN,         7,  0,  0,  0,  0,{
-    _PROG_RES_T in = 0;
+    _EXTERN_NUM_T in = 0;
 
     fprintf(stdout, "Please enter 'in':\n");
     if ( fscanf(stdin, _PROG_RES_T_SPECF, &in) != 1 )
@@ -355,7 +355,7 @@ DEF_CMD(RET,        18, 0, 0, 0, 0, {
 
 #undef _IM_CONST_T
 #undef _REG_T
-#undef _PROG_RES_T
+#undef _EXTERN_NUM_T
 #undef _CS_OFFSET_T
 
 #undef _CMD_BYTE_SIZE
