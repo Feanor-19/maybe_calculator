@@ -275,8 +275,8 @@ inline void print_spu_memory_(SPU *spu_ptr)
 
     fprintf(stderr, "MEMORY:\n");
 
-    const size_t max_num_of_cols = 8;
     int elem_width = find_maximum_elem_width( spu_ptr->memory, MEMORY_SIZE );
+    const size_t max_num_of_cols = 64 / (elem_width + 1) + 1;
 
     for (size_t ind = 0; ind < MEMORY_SIZE; ind++)
     {
