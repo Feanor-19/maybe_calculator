@@ -188,15 +188,15 @@ inline DisasmStatus print_curr_cmd_arg(Binary *binary_ptr, Output *out_ptr)
 
     if ( test_bit( info_byte, BIT_IMMEDIATE_CONST ) )
     {
-        immediate_const_t im_const = *( (immediate_const_t*) (binary_ptr->bin_arr + binary_ptr->ip) );
+        immediate_const_t im_const_raw = *( (immediate_const_t*) (binary_ptr->bin_arr + binary_ptr->ip) );
         if ( test_bit(info_byte, BIT_MEMORY) )
         {
             //TODO - добавить спецификатор в common.h
-            WRITE(out_ptr, "[%d]", (int) im_const);
+            WRITE(out_ptr, "[%d]", (int) (im_const_raw / COMPUTATIONAL_MULTIPLIER) );
         }
         else
         {
-            WRITE(out_ptr, "%d", (int) im_const);
+            WRITE(out_ptr, "%lf", ((double) im_const_raw) / COMPUTATIONAL_MULTIPLIER );
         }
         binary_ptr->ip += sizeof(immediate_const_t);
     }
@@ -216,7 +216,7 @@ inline DisasmStatus print_curr_cmd_arg(Binary *binary_ptr, Output *out_ptr)
     else if ( test_bit( info_byte, BIT_CS_OFFSET ) )
     {
         cs_offset_t offset = *( (cs_offset_t*) ( binary_ptr->bin_arr + binary_ptr->ip ) );
-        WRITE(out_ptr, "%ud", offset);
+        WRITE(out_ptr, "%u", offset);
         binary_ptr->ip += sizeof(cs_offset_t);
     }
 

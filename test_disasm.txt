@@ -2,7 +2,7 @@ SIGN: SF19
 VERSION: 11
 0			IN 
 2			IN 
-4			CALL 16d
+4			CALL 16
 10			PUSH RAX
 12			OUT 
 14			HLT 
