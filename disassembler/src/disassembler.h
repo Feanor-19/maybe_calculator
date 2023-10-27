@@ -12,21 +12,6 @@ const size_t DEFAULT_TEXT_BUF_SIZE = 10;
 
 //---------------------------------------------------------------------------------------
 
-/*
-enum DisasmStatus
-{
-    DISASM_STATUS_OK = 0,
-
-    DISASM_STATUS_ERROR_GET_IN_OUT_FILES_NAMES,
-    DISASM_STATUS_ERROR_READ_INPUT_FILE,
-    DISASM_STATUS_ERROR_OPEN_OUTPUT_FILE,
-    DISASM_STATUS_ERROR_MEM_ALLOC_ERROR,
-    DISASM_STATUS_ERROR_INP_FILE_HEADER_CORRUPTED,
-    DISASM_STATUS_ERROR_INP_FILE_CORRUPTED,
-    DISASM_STATUS_ERROR_UNKOWN_CMD,
-};
-*/
-
 #define DEF_STATUS(name, id, message) DISASM_STATUS_##name = id,
 enum DisasmStatus
 {

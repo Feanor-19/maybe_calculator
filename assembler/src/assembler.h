@@ -13,37 +13,20 @@ const size_t MAX_LABELS_COUNT = 10; //TODO - поменять массив ме�
 
 //-------------------------------------------------------------------------------------------------------------
 
-//TODO - и возможно генерировать с помощью макросов
+#define DEF_STATUS(name, id, message) ASM_STATUS_##name = id,
 enum AssemblerStatus
 {
-    ASM_STATUS_OK                              = 0,
-    ASM_STATUS_CURR_LINE_IS_A_LABEL,
-
-    ASM_STATUS_ERROR_GET_IN_OUT_FILES_NAMES,
-    ASM_STATUS_ERROR_READ_INPUT_FILE,
-    ASM_STATUS_ERROR_CANT_OPEN_OUTPUT_FILE,
-    ASM_STATUS_ERROR_MEM_ALLOC,
-    ASM_STATUS_ERROR_UNKOWN_COMMAND,
-    ASM_STATUS_ERROR_CMD_ARG,
-    ASM_STATUS_ERROR_CMD_ARG_TOO_BIG,
-    ASM_STATUS_ERROR_LABEL_REDEFINED,
-    ASM_STATUS_ERROR_UNDEFINED_LABEL,
+    #include "asm_statuses.h"
 };
+#undef DEF_STATUS
 
+#define DEF_STATUS(name, id, message) message,
 const char *assembler_error_messages[] =
 {
-    "ASM_STATUS_OK",
-    "ASM_STATUS_CURR_LINE_IS_A_LABEL",
-    "ASM_STATUS_ERROR_GET_IN_OUT_FILES_NAMES",
-    "ASM_STATUS_ERROR_READ_INPUT_FILE",
-    "ASM_STATUS_ERROR_CANT_OPEN_OUTPUT_FILE",
-    "ASM_STATUS_ERROR_MEM_ALLOC",
-    "ASM_STATUS_ERROR_UNKOWN_COMMAND",
-    "ASM_STATUS_ERROR_CMD_ARG",
-    "ASM_STATUS_ERROR_CMD_ARG_TOO_BIG",
-    "ASM_STATUS_ERROR_LABEL_REDEFINED",
-    "ASM_STATUS_ERROR_UNDEFINED_LABEL"
+    #include "asm_statuses.h"
+    "FICTIONAL MESSAGE!"
 };
+#undef DEF_STATUS
 
 struct Input
 {
