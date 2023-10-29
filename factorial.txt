@@ -1,0 +1,57 @@
+; this programm computes factorial of the entered number
+
+push 70
+prc
+push 13
+prc
+
+
+in
+call fact
+
+push rax
+push rax
+prn
+push 13
+prc
+out
+hlt
+
+; computes factorial of number N located on stack (the one under the return address)
+; result of the func is in the rax
+; ATTENTION! Uses following registers: rax rbx rdx
+fact:
+    pop rdx         ; saving return address
+
+                    ; now top number on stack is N
+    pop rbx         ; saving N to rbx
+
+    push rbx
+    push 1
+    je fact_equal_  ; if N equals 1, then result of the func is 1, else fact(N-1)*N
+
+    push rdx        ; saving for later
+    push rbx        ; saving for later
+
+    push rbx
+    push 1
+    sub
+
+    call fact
+
+                    ; now on top of the stack lays saved for later N
+    push rax
+    mul             ; fact(N-1)*N
+    pop rax
+
+                    ; now on top of the stack lays saved for later return address
+    ret
+
+    fact_equal_:
+        push 1
+        pop rax
+
+        push rdx
+        ret
+
+

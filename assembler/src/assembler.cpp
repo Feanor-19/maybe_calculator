@@ -36,6 +36,8 @@ int main(int argc, const char *argv[])
 
     print_config(stdout, cfg);
 
+
+
     Input input = read_input_file(cfg.input_file_name);
     CHECK_ERR_(input.err);
 

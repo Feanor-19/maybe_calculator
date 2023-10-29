@@ -41,7 +41,7 @@
 #define _MUL(a, b) ( ((a) * (b)) / COMPUTATIONAL_MULTIPLIER)
 
 #define _CAST_PROG_RES_TO_IM_CONST( x_ ) ( (_IM_CONST_T) (x_ * COMPUTATIONAL_MULTIPLIER) )
-#define _CAST_IM_CONST_TO_PROG_RES( x_ ) ( ( (_EXTERN_NUM_T) buf ) / COMPUTATIONAL_MULTIPLIER )
+#define _CAST_IM_CONST_TO_PROG_RES( x_ ) ( ( (_EXTERN_NUM_T) x_ ) / COMPUTATIONAL_MULTIPLIER ) // TODO - переименовать в extern_num_t
 #define _CAST_CS_OFFSET_TO_IM_CONST( x_ ) ( ( _IM_CONST_T ) x_ )
 #define _CAST_IM_CONST_TO_CS_OFFSET( x_ ) ( ( _CS_OFFSET_T ) x_ )
 #define _CAST_IM_CONST_TO_MEMORY_T( x_ ) ( (_MEMORY_T) ( x_ / COMPUTATIONAL_MULTIPLIER ) )
@@ -342,6 +342,28 @@ DEF_CMD(RET,        18, 0, 0, 0, 0, {
     _IP = dest;
 
     return SPU_STATUS_OK;
+})
+
+// TODO - работает только в пошаговом режиме почему-то...
+DEF_CMD(PRN,        19, 0, 0, 0, 0, {
+    _IM_CONST_T num_raw = 0;
+    _POP( &num_raw );
+
+    _EXTERN_NUM_T to_print = _CAST_IM_CONST_TO_PROG_RES( num_raw );
+
+    fprintf(stdout, "%lf", to_print );
+
+    _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
+})
+
+// TODO - работает только в пошаговом режиме почему-то...
+DEF_CMD(PRC,        20, 0, 0, 0, 0, {
+    _IM_CONST_T num_raw = 0;
+    _POP( &num_raw );
+
+    putc( (int) ( num_raw / COMPUTATIONAL_MULTIPLIER ), stdout );
+
+    _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
 })
 
 //-------------UNDEF DSL--------------

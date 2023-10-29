@@ -8,8 +8,6 @@
 #include "../../common/common.h"
 #include "../../common/utils.h"
 
-//TODO - переделать на кодогенерацию
-
 /*
 const char* spu_status_messages[] =
 {
@@ -55,7 +53,7 @@ enum SPUStatus
 };
 */
 
-#define DEF_STATUS(name, id, message) SPU_STjATUS_##name = id,
+#define DEF_STATUS(name, id, message) SPU_STATUS_##name = id,
 enum SPUStatus
 {
     #include "spu_statuses.h"
