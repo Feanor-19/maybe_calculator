@@ -26,7 +26,7 @@
 
 #define _IM_CONST_T     spu_stack_elem_t
 #define _REG_T          uint8_t
-#define _EXTERN_NUM_T     extern_num_t
+#define _EXTERN_NUM_T   extern_num_t
 #define _CS_OFFSET_T    cs_offset_t
 #define _MEMORY_T       uint32_t
 
@@ -35,16 +35,16 @@
 
 #define _PROG_RES_T_SPECF "%lf"
 
-#define _ADD(a, b) ((a) + (b))
-#define _SUB(a, b) ((a) - (b))
-#define _DIV(a, b) ( ((a) / (b)) * COMPUTATIONAL_MULTIPLIER)
-#define _MUL(a, b) ( ((a) * (b)) / COMPUTATIONAL_MULTIPLIER)
-
 #define _CAST_PROG_RES_TO_IM_CONST( x_ ) ( (_IM_CONST_T) (x_ * COMPUTATIONAL_MULTIPLIER) )
 #define _CAST_IM_CONST_TO_PROG_RES( x_ ) ( ( (_EXTERN_NUM_T) x_ ) / COMPUTATIONAL_MULTIPLIER ) // TODO - переименовать в extern_num_t
 #define _CAST_CS_OFFSET_TO_IM_CONST( x_ ) ( ( _IM_CONST_T ) x_ )
 #define _CAST_IM_CONST_TO_CS_OFFSET( x_ ) ( ( _CS_OFFSET_T ) x_ )
 #define _CAST_IM_CONST_TO_MEMORY_T( x_ ) ( (_MEMORY_T) ( x_ / COMPUTATIONAL_MULTIPLIER ) )
+
+#define _ADD(a, b) ((a) + (b))
+#define _SUB(a, b) ((a) - (b))
+#define _DIV(a, b) ( (_CAST_IM_CONST_TO_PROG_RES(a) / _CAST_IM_CONST_TO_PROG_RES(b)) * COMPUTATIONAL_MULTIPLIER)
+#define _MUL(a, b) ( ((a) * (b)) / COMPUTATIONAL_MULTIPLIER)
 
 #define _PUSH(x) STACK_FUNC_WRAP(stack_push( &(_SPU->stk), (x) ))
 #define _POP(ptr_to) STACK_FUNC_WRAP(stack_pop( &(_SPU->stk), (ptr_to) ))
@@ -394,15 +394,15 @@ DEF_CMD(SQRT,       21, 0, 0, 0, 0, {
 
 #undef _PROG_RES_T_SPECF
 
-#undef _ADD
-#undef _SUB
-#undef _DIV
-#undef _MUL
-
 #undef _CAST_PROG_RES_TO_IM_CONST
 #undef _CAST_IM_CONST_TO_PROG_RES
 #undef _CAST_CS_OFFSET_TO_IM_CONST
 #undef _CAST_IM_CONST_TO_CS_OFFSET
+
+#undef _ADD
+#undef _SUB
+#undef _DIV
+#undef _MUL
 
 #undef _PUSH
 #undef _POP
