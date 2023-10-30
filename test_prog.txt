@@ -1,5 +1,16 @@
 ; some header information
 
+push 23
+prn
+
+push 19
+prn
+
+push 10
+prc
+push 13
+prc
+
 push 5
 pop rbx
 
@@ -14,4 +25,8 @@ push [rbx]
 add
 
 out
+
+push 42
+prn
+
 hlt

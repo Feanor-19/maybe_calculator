@@ -1,19 +1,15 @@
 ; this programm computes factorial of the entered number
 
-push 70
-prc
-push 13
-prc
-
-
 in
+
 call fact
 
 push rax
-push rax
 prn
-push 13
-prc
+
+call new_line
+
+push rax
 out
 hlt
 
@@ -54,4 +50,9 @@ fact:
         push rdx
         ret
 
-
+new_line:
+    push 10
+    prc
+    push 13
+    prc
+    ret

@@ -344,7 +344,6 @@ DEF_CMD(RET,        18, 0, 0, 0, 0, {
     return SPU_STATUS_OK;
 })
 
-// TODO - работает только в пошаговом режиме почему-то...
 DEF_CMD(PRN,        19, 0, 0, 0, 0, {
     _IM_CONST_T num_raw = 0;
     _POP( &num_raw );
@@ -356,7 +355,6 @@ DEF_CMD(PRN,        19, 0, 0, 0, 0, {
     _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
 })
 
-// TODO - работает только в пошаговом режиме почему-то...
 DEF_CMD(PRC,        20, 0, 0, 0, 0, {
     _IM_CONST_T num_raw = 0;
     _POP( &num_raw );
