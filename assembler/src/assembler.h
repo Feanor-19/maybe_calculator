@@ -8,8 +8,8 @@
 
 //! @brief Everything between this symbol and the end of line is considered as a comment.
 const char COMMENT_SYMB = ';';
-const size_t LABEL_NAME_MAX_LEN = 33;
-const size_t MAX_LABELS_COUNT = 10; //TODO - поменять массив меток на динамический, может быть список?
+const size_t LABEL_NAME_MAX_LEN = 50;
+const size_t MAX_LABELS_COUNT = 100; //TODO - поменять массив меток на динамический, может быть список?
 
 //-------------------------------------------------------------------------------------------------------------
 

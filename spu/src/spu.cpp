@@ -210,17 +210,17 @@ inline void print_header_bytes_(const BIN_HEADER_SIGN_t sign,
 {
     for (size_t ind = 0; ind < sizeof(BIN_HEADER_SIGN_t); ind++)
     {
-        fprintf(stderr, "%02X ", ( (const char*) &sign )[ind] );
+        fprintf(stderr, "%02X ", ( (const unsigned char*) &sign )[ind] );
     }
 
     for (size_t ind = 0; ind < sizeof(BIN_HEADER_VERSION_t); ind++)
     {
-        fprintf(stderr, "%02X ", ( (const char*) &version )[ind] );
+        fprintf(stderr, "%02X ", ( (const unsigned char*) &version )[ind] );
     }
 
     for (size_t ind = 0; ind < sizeof(BIN_HEADER_FILE_SIZE_t); ind++)
     {
-        fprintf(stderr, "%02X ", ( (const char*) &binary_size_in_bytes )[ind] );
+        fprintf(stderr, "%02X ", ( (const unsigned char*) &binary_size_in_bytes )[ind] );
     }
 }
 

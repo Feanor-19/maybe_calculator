@@ -117,7 +117,7 @@ const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
 //--- BINARY FILE HEADER -----------------------------------------------------------------------------
 const static char SIGN_RAW_[4] = {'S', 'F', '1', '9'};
 const BIN_HEADER_SIGN_t SIGN = *((const BIN_HEADER_SIGN_t*) SIGN_RAW_);
-const BIN_HEADER_VERSION_t VERSION   = 13;
+const BIN_HEADER_VERSION_t VERSION   = 14;
 const BIN_HEADER_FILE_SIZE_t HEADER_SIZE_IN_BYTES = sizeof(BIN_HEADER_SIGN_t) + sizeof(BIN_HEADER_VERSION_t) + sizeof(BIN_HEADER_FILE_SIZE_t);
 //----------------------------------------------------------------------------------------------------
 

@@ -178,9 +178,9 @@ DEF_CMD(DIV,        6,  0,  0,  0,  0,{
     _IM_CONST_T b = 0;
     _POP(&a);
     _POP(&b);
-    if (b == 0)
+    if (a == 0)
         return SPU_STATUS_ERROR_DIV_BY_ZERO;
-    _PUSH( _DIV(a,b) );
+    _PUSH( _DIV(b,a) );
 
     _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
 
@@ -363,6 +363,17 @@ DEF_CMD(PRC,        20, 0, 0, 0, 0, {
 
     _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
 })
+
+DEF_CMD(SQRT,       21, 0, 0, 0, 0, {
+    _IM_CONST_T num_raw = 0;
+    _POP( &num_raw );
+
+    _EXTERN_NUM_T res = sqrt( _CAST_IM_CONST_TO_PROG_RES( num_raw ) );
+    _PUSH( _CAST_PROG_RES_TO_IM_CONST( res ) );
+
+    _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
+})
+
 
 //-------------UNDEF DSL--------------
 

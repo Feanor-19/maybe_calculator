@@ -1,0 +1,209 @@
+; this program solves quadratic equation.
+; coefficients are entered using the interface of the command 'in', in order a, b, c.
+call get_coeffs
+
+call solve_square
+
+pop rdx                     ; moving number of roots to rdx
+
+push rdx
+prn                         ; printing number of roots
+call new_line
+
+push rdx
+out                         ; just in case
+
+push rdx
+push 1
+je one_root_to_print
+
+push rdx
+push 2
+je two_roots_to_print
+hlt
+
+one_root_to_print:
+    ; the root is already on top of the stack
+    prn
+    call new_line
+    hlt
+
+two_roots_to_print:
+    ; the roots are already on top of the stack
+    prn
+    call new_line
+
+    prn
+    call new_line
+
+    hlt
+
+; solves square equation ax^2+bx+c=0. coefficients are read from rax, rbx, rcx.
+; RDX IS USED! rax, rbx and rcx DON'T save their values!
+; the answer lays on stack in the following order (from bottom to top):
+; *0, 1 or 2 roots*, number of roots (-1, 0, 1, 2, 8)
+; -1    : no roots, even in complex plane
+; 0     : zero real roots
+; 1     : one real root
+; 2     : two real roots
+; 8     : infinite number of roots
+solve_square:
+    pop rdx                         ; saving ret address
+
+    push rax
+    push 0
+    jne solve_square_a_neq_zero     ; if a == 0
+
+    push rdx                        ; saving for later
+    pop rax                         ; because rax is not used by solve_linear
+    call solve_linear
+    push rax
+    ret
+
+    solve_square_a_neq_zero:
+        push rdx                    ; saving for later
+        call cmpt_disc
+
+        ; now discriminant is in rdx
+        push rdx
+        push 0
+        jb solve_square_zero_roots    ; if discr >= 0
+
+        push rdx
+        push 0
+        je solve_square_one_root    ; if discr != 0
+
+        ; two roots
+        ; because we don't need c anymore when we have discriminant, we can use rcx
+        pop rcx                     ; moving returning address into rcx
+
+        ; first root:
+        push rbx
+        push -1
+        mul
+        push rdx
+        sqrt
+        add
+
+        push 2
+        push rax
+        mul
+
+        div
+        ; first root is ready
+
+        ; second root:
+        push rbx
+        push -1
+        mul
+        push rdx
+        sqrt
+        sub
+
+        push 2
+        push rax
+        mul
+
+        div
+        ; second root is ready
+
+        push 2                  ; number of roots
+
+        push rcx
+        ret
+
+        solve_square_zero_roots:
+            ; discr in rdx is not needed anymore
+            pop rdx             ; moving ret address to rdx
+            push 0              ; number of roots
+            ret
+
+        solve_square_one_root:
+            ; discr in rdx is not needed anymore
+            pop rdx             ; moving ret address to rdx
+
+            ; computing root:
+            push rbx
+            push -1
+            mul
+            push rax
+            push 2
+            mul
+            div
+            ; root is ready
+
+            push 1              ; number of roots
+
+            push rdx
+            ret
+
+
+; computes discriminant of ax^2+bx+c=0. coefficients are read from rax, rbx, rcx.
+; answer is left in rdx
+cmpt_disc:
+    push rbx
+    push rbx
+    mul
+    push 4
+    push rax
+    mul
+    push rcx
+    mul
+    sub
+    pop rdx
+    ret
+
+; solves bx+c=0, coefficients are read from rbx and rcx.
+; RDX IS USED! rbx and rcx save their values.
+; the answer lays on stack in the following order (from bottom to top):
+; *0 or 1 roots*, number of roots (-1, 1, 8)
+; -1    : no roots, even in complex plane
+; 1     : one real root
+; 8     : infinite number of roots
+solve_linear:
+    pop rdx                         ; saving ret address
+
+    push rbx
+    push 0                          ; number of roots
+    jne solve_linear_b_neq_zero     ; if b == 0
+    push rcx
+    push 0
+    jne solve_linear_c_neq_zero     ; if c == 0
+    push 8                          ; number of roots
+    push rdx
+    ret
+
+    solve_linear_c_neq_zero:
+        push -1                     ; number of roots
+        push rdx
+        ret
+
+    solve_linear_b_neq_zero:
+        push rcx
+        push -1
+        mul
+        push rbx
+        div
+
+        push 1                      ; number of roots
+
+        push rdx
+        ret
+
+; fills rax, rbx and rcx with corresponding coefficients
+get_coeffs:
+    in
+    pop rax
+    in
+    pop rbx
+    in
+    pop rcx
+    ret
+
+; puts new line in windows
+new_line:
+    push 10
+    prc
+    push 13
+    prc
+    ret
