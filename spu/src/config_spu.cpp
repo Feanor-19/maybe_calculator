@@ -2,15 +2,11 @@
 
 const char* FLAG_HELP               = "-h";
 const char* FLAG_INPUT_FILE         = "-i";
-const char* FLAG_OUTPUT_FILE        = "-o";
-const char* FLAG_PARAMS_FILE        = "-p";
 const char* FLAG_DEBUG_MODE         = "-d";
 
 CmdLineFlag supported_flags[] = {
                                     { FLAG_HELP             , 0, 0, "" },
                                     { FLAG_INPUT_FILE       , 0, 1, "" },
-                                    { FLAG_OUTPUT_FILE      , 0, 1, "" },
-                                    { FLAG_PARAMS_FILE      , 0, 1, "" },
                                     { FLAG_DEBUG_MODE       , 0, 0, "" }
                                 };
 
@@ -52,8 +48,6 @@ static Config assemble_config(size_t n_flags, CmdLineFlag flags[])
     assert(flags != NULL);
 
     const char *FILE_IN_DEFAULT_NAME        = "spu_in.txt";
-    const char *FILE_OUT_DEFAULT_NAME       = "spu_out.txt";
-    const char *FILE_PARAMS_DEFAULT_NAME    = "spu_params.txt";
 
     Config config = {};
 
@@ -72,36 +66,6 @@ static Config assemble_config(size_t n_flags, CmdLineFlag flags[])
     else
     {
         config.input_file_name = FILE_IN_DEFAULT_NAME;
-    }
-
-    if ( (p_curr_flag = extract(n_flags, supported_flags, FLAG_OUTPUT_FILE) )!= NULL
-       && p_curr_flag->state )
-    {
-        if ( is_str_empty(p_curr_flag->add_arg) )
-        {
-            config.error = CONFIG_ERROR_OUTPUT;
-            return config;
-        }
-        config.output_file_name = p_curr_flag->add_arg;
-    }
-    else
-    {
-        config.output_file_name = FILE_OUT_DEFAULT_NAME;
-    }
-
-    if ( (p_curr_flag = extract(n_flags, supported_flags, FLAG_PARAMS_FILE) )!= NULL
-       && p_curr_flag->state )
-    {
-        if ( is_str_empty(p_curr_flag->add_arg) )
-        {
-            config.error = CONFIG_ERROR_PARAMS;
-            return config;
-        }
-        config.params_file_name = p_curr_flag->add_arg;
-    }
-    else
-    {
-        config.params_file_name = FILE_PARAMS_DEFAULT_NAME;
     }
 
     if ( (p_curr_flag = extract(n_flags, supported_flags, FLAG_DEBUG_MODE) )!= NULL
@@ -125,12 +89,8 @@ void print_config(FILE *stream, Config cfg)
 
     printf("The following configuration is set:\n"
         "input file:                            <%s>\n"
-        "output file:                           <%s>\n"
-        "parametres file:                       <%s>\n"
         "debug mode:                            <%s>\n",
         cfg.input_file_name,
-        cfg.output_file_name,
-        cfg.params_file_name,
         ( cfg.debug_mode ? "ON" : "OFF") );
 }
 
@@ -144,12 +104,6 @@ void print_cfg_error_message(FILE *stream, ConfigError error)
     {
     case CONFIG_ERROR_INPUT:
         fprintf(stream, "Input file error.\n");
-        break;
-    case CONFIG_ERROR_OUTPUT:
-        fprintf(stream, "Output file error.\n");
-        break;
-    case CONFIG_ERROR_PARAMS:
-        fprintf(stream, "Parametres file error.\n");
         break;
     case CONFIG_NO_ERROR:
     default:
