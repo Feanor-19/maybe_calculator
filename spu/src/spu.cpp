@@ -224,32 +224,45 @@ inline void print_header_bytes_(const BIN_HEADER_SIGN_t sign,
     }
 }
 
+inline void print_cs_cols_indices_(size_t row_width, size_t max_row_num_width)
+{
+    put_n_chars(stderr, max_row_num_width + 2, ' ');
+    for (size_t col = 0; col < row_width; col++)
+    {
+        fprintf(stderr, "%2d ", (int) col);
+    }
+    putc('\n', stderr);
+    putc('\n', stderr);
+}
+
+// TODO - убрать из печати header, это больше не имеет смысла
 inline void print_spu_header_and_cs_(SPU *spu_ptr)
 {
     assert(spu_ptr);
 
-    fprintf(stderr, "HEADER + CODE SEGMENT:\n{\n");
+    fprintf(stderr, "HEADER:\n");
 
     print_header_bytes_(SIGN, VERSION, (BIN_HEADER_FILE_SIZE_t) spu_ptr->cs_size + HEADER_SIZE_IN_BYTES);
+    putc('\n', stderr);
+
+    fprintf(stderr, "CODE SEGMENT:\n{\n");
 
     const size_t row_width = 16;
+    const size_t col_of_ip_on_this_row_default_value = row_width + 1;
+    const size_t rows_count = spu_ptr->cs_size / row_width + ( spu_ptr->cs_size % row_width != 0 );
+    const size_t max_row_num_width = find_num_width( (int) (rows_count - 1) );
 
-    size_t full_bin_file_size = spu_ptr->cs_size + HEADER_SIZE_IN_BYTES;
-    size_t rows_count = full_bin_file_size / row_width + ( full_bin_file_size % row_width != 0 );
-    size_t ind = 0;
+    print_cs_cols_indices_( row_width, max_row_num_width );
+
     for (size_t row = 0; row < rows_count; row++ )
     {
-        const size_t col_of_ip_on_this_row_default_value = row_width + 1;
         size_t col_of_ip_on_this_row = col_of_ip_on_this_row_default_value;
+
+        printf("%*lld: ", (int) max_row_num_width, row);
+
         for (size_t col = 0; col < row_width; col++)
         {
-            if (row == 0 && col == 0)
-            {
-                // because header is already printed
-                col = HEADER_SIZE_IN_BYTES;
-            }
-
-            ind = row*row_width + col - HEADER_SIZE_IN_BYTES;
+            size_t ind = row*row_width + col;
 
             if ( ind >= spu_ptr->cs_size )
                 break;
@@ -261,7 +274,7 @@ inline void print_spu_header_and_cs_(SPU *spu_ptr)
         putc('\n', stderr);
         if (col_of_ip_on_this_row != col_of_ip_on_this_row_default_value)
         {
-            put_n_chars(stderr, 3*col_of_ip_on_this_row, ' ');
+            put_n_chars(stderr, max_row_num_width + 2 + 3*col_of_ip_on_this_row, ' ');
             putc('^', stderr);
         }
         putc('\n', stderr);
