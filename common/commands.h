@@ -43,8 +43,8 @@
 
 #define _ADD(a, b) ((a) + (b))
 #define _SUB(a, b) ((a) - (b))
-#define _DIV(a, b) ( (_CAST_IM_CONST_TO_PROG_RES(a) / _CAST_IM_CONST_TO_PROG_RES(b)) * COMPUTATIONAL_MULTIPLIER)
-#define _MUL(a, b) ( ((a) * (b)) / COMPUTATIONAL_MULTIPLIER)
+#define _DIV(a, b) ( _CAST_PROG_RES_TO_IM_CONST( _CAST_IM_CONST_TO_PROG_RES(a) / _CAST_IM_CONST_TO_PROG_RES(b) ) )
+#define _MUL(a, b) ( _CAST_PROG_RES_TO_IM_CONST( _CAST_IM_CONST_TO_PROG_RES(a) * _CAST_IM_CONST_TO_PROG_RES(b)))
 
 #define _PUSH(x) STACK_FUNC_WRAP(stack_push( &(_SPU->stk), (x) ))
 #define _POP(ptr_to) STACK_FUNC_WRAP(stack_pop( &(_SPU->stk), (ptr_to) ))

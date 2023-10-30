@@ -116,6 +116,8 @@ solve_square:
             ; discr in rdx is not needed anymore
             pop rdx             ; moving ret address to rdx
             push 0              ; number of roots
+
+            push rdx
             ret
 
         solve_square_one_root:
