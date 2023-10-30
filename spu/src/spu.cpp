@@ -235,7 +235,6 @@ inline void print_cs_cols_indices_(size_t row_width, size_t max_row_num_width)
     putc('\n', stderr);
 }
 
-// TODO - убрать из печати header, это больше не имеет смысла
 inline void print_spu_header_and_cs_(SPU *spu_ptr)
 {
     assert(spu_ptr);
