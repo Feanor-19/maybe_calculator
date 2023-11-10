@@ -42,7 +42,6 @@ struct BinOut
     AssemblerStatus err;    //< Holds current error state.
 };
 
-//TODO - стоит ли сделать union?
 struct CmdArg
 {
     immediate_const_t im_const;             //< Is used if needed.

@@ -400,8 +400,8 @@ CmdArg get_arg(Command cmd, const char *arg)
     char rgstr[register_name_len + 1] = "";
     int reg_id = 0;
 
-    if      ( command_needs_im_const_arg[(int) cmd]
-            && sscanf(arg, "%lf", &immediate_const_raw) == 1 )
+    if  ( command_needs_im_const_arg[(int) cmd]
+        && sscanf(arg, "%lf", &immediate_const_raw) == 1 )
     {
         if ( (int) (immediate_const_raw) >= INT_MAX / COMPUTATIONAL_MULTIPLIER )
         {
