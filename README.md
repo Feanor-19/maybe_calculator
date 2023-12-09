@@ -50,8 +50,5 @@ Please, see `spu_statuses.h`.
 1. Code-generating macros (too many of them). Thanks to code-generating macros, adding new command, which doesn't implement new core ideas (and only uses old ones), requires to edit just one file `commands.h`. New command must be described using DSL, which you can find in the beginning of the mentioned file.
 2. Customizing. Some changes can be easily done by editing typedefs and constants in `common.h`, but be careful. For example, adding new register to the processor requires just to edit one constant array `registers_names`.
 3. RAM. SPU includes RAM, some commands can write to it and read from it. For example, `push [2]` reads third cell and pushes value stored there on stack; `pop [rax]` pops value from stack and writes it to the memory cell by index read from register `rax`.
-4. Fixed-point calculations. SPU stack contains integers, but in programs all constants are doubles, just like the result of the program. So, fixed-point calculations connent these things together.
+4. Fixed-point calculations. SPU stack contains integers, but in programs all constants are doubles, just like the result of the program. So, fixed-point calculations connect these two things together.
 5. Common stack. There is no individual stack for returning addresses of functions, which makes SPU faster and writing programs trickier. See programs `factorial` and `square_solver`!
-
-## Credits
-This is MIPT DED32 course project. Thanks to DED32 and my mentor PLT!
