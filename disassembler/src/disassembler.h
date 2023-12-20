@@ -59,12 +59,19 @@ void free_binary( Binary * bin_ptr );
 
 void print_disasm_error_message( DisasmStatus err );
 
+#define CHECK_ERR_(err) do{if ( (err) ) { print_disasm_error_message((err)); return (err); }} while(0)
+
 //TODO - придумать как передавать ошибку от write_chars_to_output
 #define WRITE(out_ptr, ...) do {                                                    \
     char char_buf[MAX_ONE_WRITE_TO_OUT_LENGTH] = {};                                \
-    write_chars_to_output( (out_ptr), char_buf, sprintf( char_buf, __VA_ARGS__) );  \
+    DisasmStatus err = write_chars_to_output(   (out_ptr),                          \
+                                                char_buf,                           \
+                                                sprintf( char_buf, __VA_ARGS__) );  \
+    if (err)                                                                        \
+    {                                                                               \
+        print_disasm_error_message(err);                                            \
+    }                                                                               \
 } while (0)
 
-#define CHECK_ERR_(err) do{if ( (err) ) { print_disasm_error_message((err)); return (err); }} while(0)
 
 #endif /* DISASSEMBLER_H */

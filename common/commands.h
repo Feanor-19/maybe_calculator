@@ -33,7 +33,7 @@
 #define _CMD_BYTE_SIZE  sizeof(int8_t)
 #define _INFO_BYTE_SIZE sizeof(int8_t)
 
-#define _PROG_RES_T_SPECF "%lf"
+#define _PROG_RES_T_SPECF "%f"
 
 #define _CAST_PROG_RES_TO_IM_CONST( x_ ) ( (_IM_CONST_T) (x_ * COMPUTATIONAL_MULTIPLIER) )
 #define _CAST_IM_CONST_TO_PROG_RES( x_ ) ( ( (_EXTERN_NUM_T) x_ ) / COMPUTATIONAL_MULTIPLIER ) // TODO - переименовать в extern_num_t
@@ -190,7 +190,6 @@ DEF_CMD(DIV,        6,  0,  0,  0,  0,{
 DEF_CMD(IN,         7,  0,  0,  0,  0,{
     _EXTERN_NUM_T in = 0;
 
-    fprintf(stdout, "Please enter 'in':\n");
     if ( fscanf(stdin, _PROG_RES_T_SPECF, &in) != 1 )
         return SPU_STATUS_ERROR_WRONG_IN;
 
@@ -350,7 +349,7 @@ DEF_CMD(PRN,        19, 0, 0, 0, 0, {
 
     _EXTERN_NUM_T to_print = _CAST_IM_CONST_TO_PROG_RES( num_raw );
 
-    fprintf(stdout, "%lf", to_print );
+    fprintf(stdout, "%g", to_print );
 
     _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
 })
@@ -369,6 +368,46 @@ DEF_CMD(SQRT,       21, 0, 0, 0, 0, {
     _POP( &num_raw );
 
     _EXTERN_NUM_T res = sqrt( _CAST_IM_CONST_TO_PROG_RES( num_raw ) );
+    _PUSH( _CAST_PROG_RES_TO_IM_CONST( res ) );
+
+    _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
+})
+
+DEF_CMD(SIN,        22, 0, 0, 0, 0, {
+    _IM_CONST_T num_raw = 0;
+    _POP( &num_raw );
+
+    _EXTERN_NUM_T res = sin( _CAST_IM_CONST_TO_PROG_RES( num_raw ) );
+    _PUSH( _CAST_PROG_RES_TO_IM_CONST( res ) );
+
+    _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
+})
+
+DEF_CMD(COS,        23, 0, 0, 0, 0, {
+    _IM_CONST_T num_raw = 0;
+    _POP( &num_raw );
+
+    _EXTERN_NUM_T res = cos( _CAST_IM_CONST_TO_PROG_RES( num_raw ) );
+    _PUSH( _CAST_PROG_RES_TO_IM_CONST( res ) );
+
+    _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
+})
+
+DEF_CMD(EXP,        24, 0, 0, 0, 0, {
+    _IM_CONST_T num_raw = 0;
+    _POP( &num_raw );
+
+    _EXTERN_NUM_T res = exp( _CAST_IM_CONST_TO_PROG_RES( num_raw ) );
+    _PUSH( _CAST_PROG_RES_TO_IM_CONST( res ) );
+
+    _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
+})
+
+DEF_CMD(LN,         25, 0, 0, 0, 0, {
+    _IM_CONST_T num_raw = 0;
+    _POP( &num_raw );
+
+    _EXTERN_NUM_T res = logf( _CAST_IM_CONST_TO_PROG_RES( num_raw ) );
     _PUSH( _CAST_PROG_RES_TO_IM_CONST( res ) );
 
     _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;

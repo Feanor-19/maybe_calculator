@@ -176,9 +176,9 @@ inline AssemblerStatus handle_cmd_arg(  int8_t *bin_arr,
     return ASM_STATUS_OK;
 }
 
-inline Label* find_label( Label labels[], const char *label_name )
+inline Label* find_label( Label labels[], size_t *labels_cap, const char *label_name )
 {
-    for (size_t ind = 0; ind < MAX_LABELS_COUNT; ind++)
+    for (size_t ind = 0; ind < *labels_cap; ind++)
     {
         if ( strcmp(labels[ind].name, label_name) == 0 )
             return labels + ind;
@@ -191,9 +191,21 @@ inline int check_last_char(const char *str, char c)
     return str[strlen(str) - 1] == c;
 }
 
+inline Label* realloc_labels_if_needed( Label *labels, size_t labels_ind, size_t *labels_cap )
+{
+    if ( labels_ind >= *labels_cap )
+    {
+        *labels_cap *= 2;
+        return (Label*) realloc( labels, *labels_cap );
+    }
+
+    return labels;
+}
+
 //! @brief Checks if str contains a valid label (without spaces in it and ends with ':')
 // and remembers label's location and name.
-inline AssemblerStatus check_if_label_and_handle( const char *str, size_t bin_arr_ind, Label labels[] )
+inline AssemblerStatus check_if_label_and_handle( const char *str, size_t bin_arr_ind,
+                                                  Label labels[], size_t *labels_cap)
 {
     char label[LABEL_NAME_MAX_LEN] = "---";
     if ( sscanf(str, "%s", label) != 1 || !check_last_char(label, ':'))
@@ -201,23 +213,24 @@ inline AssemblerStatus check_if_label_and_handle( const char *str, size_t bin_ar
 
     static size_t labels_ind = 0;
 
-    if ( find_label(labels, label) )
+    if ( find_label(labels, labels_cap, label) )
         return ASM_STATUS_ERROR_LABEL_REDEFINED;
 
     Label tmp = {};
     tmp.bin_arr_ind = bin_arr_ind;
     strncpy(tmp.name, label, strlen(label) - 1);
 
+    labels = realloc_labels_if_needed( labels, labels_ind, labels_cap );
     labels[labels_ind++] = tmp;
     return ASM_STATUS_CURR_LINE_IS_A_LABEL;
 }
 
-inline AssemblerStatus handle_fixup(int8_t* bin_arr, Stack *fixup_stk_ptr, Label labels[])
+inline AssemblerStatus handle_fixup(int8_t* bin_arr, Stack *fixup_stk_ptr, Label labels[], size_t *labels_cap)
 {
     Fixup fixup = {};
     while ( stack_pop( fixup_stk_ptr, &fixup ) != STACK_ERROR_NOTHING_TO_POP )
     {
-        Label *lbl_ptr = find_label(labels, fixup.label_name );
+        Label *lbl_ptr = find_label(labels, labels_cap, fixup.label_name );
         if (!lbl_ptr)
             return ASM_STATUS_ERROR_UNDEFINED_LABEL;
 
@@ -248,13 +261,16 @@ BinOut translate_to_binary(Input input)
     Stack fixup_stk = {};
     stack_ctor(&fixup_stk);
 
-    Label labels[MAX_LABELS_COUNT] = {};
+    size_t labels_cap = DEFAULT_LABELS_COUNT;
+    Label *labels = (Label*) calloc( labels_cap, sizeof(Label) );
 
     for (unsigned long ind = 0; ind < input.text.nLines; ind++)
     {
         if ( is_str_empty(input.text.line_array[ind]) ) continue;
 
-        AssemblerStatus label_status = check_if_label_and_handle( input.text.line_array[ind], bin_arr_ind, labels);
+        AssemblerStatus label_status = check_if_label_and_handle( input.text.line_array[ind],
+                                                                  bin_arr_ind, labels,
+                                                                  &labels_cap);
         if (label_status == ASM_STATUS_CURR_LINE_IS_A_LABEL)
             continue;
         else if (label_status == ASM_STATUS_ERROR_LABEL_REDEFINED)
@@ -295,7 +311,7 @@ BinOut translate_to_binary(Input input)
         handle_cmd_arg(bin_arr, &bin_arr_ind, cmd_arg, &fixup_stk);
     }
 
-    AssemblerStatus error = handle_fixup(bin_arr, &fixup_stk, labels);
+    AssemblerStatus error = handle_fixup(bin_arr, &fixup_stk, labels, &labels_cap);
     if (error)
     {
         free(bin_arr);
@@ -401,7 +417,7 @@ CmdArg get_arg(Command cmd, const char *arg)
     int reg_id = 0;
 
     if  ( command_needs_im_const_arg[(int) cmd]
-        && sscanf(arg, "%lf", &immediate_const_raw) == 1 )
+        && sscanf(arg, "%f", &immediate_const_raw) == 1 )
     {
         if ( (int) (immediate_const_raw) >= INT_MAX / COMPUTATIONAL_MULTIPLIER )
         {
@@ -426,7 +442,7 @@ CmdArg get_arg(Command cmd, const char *arg)
     }
     else if ( command_needs_memory_arg[(int) cmd] )
     {
-        if ( sscanf(arg, " [ %lf ] ", &immediate_const_raw) == 1 )
+        if ( sscanf(arg, " [ %f ] ", &immediate_const_raw) == 1 )
         {
             cmd_arg.info_byte = set_bit( cmd_arg.info_byte, BIT_MEMORY );
             cmd_arg.info_byte = set_bit( cmd_arg.info_byte, BIT_IMMEDIATE_CONST );

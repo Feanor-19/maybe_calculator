@@ -45,7 +45,7 @@
 
 typedef int spu_stack_elem_t;
 // такой тип имеет результат программы и числовые константы (не адреса) в коде программ
-typedef double extern_num_t;
+typedef float extern_num_t;
 
 typedef int32_t immediate_const_t; //TODO - исправить путаницу между im_const и spu_stack_elem_t, maybe inner_num_t
 typedef uint32_t cs_offset_t; //!< jmp cmd argument
@@ -117,7 +117,7 @@ const size_t commands_list_len = sizeof(commands_list)/sizeof(commands_list[0]);
 //--- BINARY FILE HEADER -----------------------------------------------------------------------------
 const static char SIGN_RAW_[4] = {'S', 'F', '1', '9'};
 const BIN_HEADER_SIGN_t SIGN = *((const BIN_HEADER_SIGN_t*) SIGN_RAW_);
-const BIN_HEADER_VERSION_t VERSION   = 14;
+const BIN_HEADER_VERSION_t VERSION = 15;
 const BIN_HEADER_FILE_SIZE_t HEADER_SIZE_IN_BYTES = sizeof(BIN_HEADER_SIGN_t) + sizeof(BIN_HEADER_VERSION_t) + sizeof(BIN_HEADER_FILE_SIZE_t);
 //----------------------------------------------------------------------------------------------------
 

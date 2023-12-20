@@ -1,0 +1,67 @@
+PUSH 5.000000
+POP [0]
+
+PUSH 10.000000
+POP [1]
+
+PUSH 2.000000
+POP [2]
+
+PUSH 0.000000
+POP [3]
+
+PUSH [0]
+PUSH [2]
+ADD
+
+PUSH [1]
+PUSH [2]
+DIV
+
+JAE cmp_yes_0
+PUSH 0
+JMP cmp_end_0
+cmp_yes_0:
+PUSH 1
+cmp_end_0:
+
+PUSH 0
+JE if_end_0
+while_0:
+PUSH [0]
+PUSH [2]
+DIV
+
+PUSH [1]
+JB cmp_yes_1
+PUSH 0
+JMP cmp_end_1
+cmp_yes_1:
+PUSH 1
+cmp_end_1:
+
+PUSH 0
+JE while_end_0
+PUSH [0]
+PUSH [2]
+ADD
+
+POP [0]
+
+PUSH [1]
+PUSH [3]
+ADD
+
+POP [1]
+
+JMP while_0
+while_end_0:
+
+; dummy
+
+if_end_0:
+
+; dummy
+
+; dummy
+

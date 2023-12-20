@@ -139,7 +139,8 @@ DisasmStatus write_chars_to_output( Output *out_ptr, char* char_arr, size_t ncha
 
     while ( curr_out_ind + nchars >= out_ptr->curr_text_buf_size )
     {
-        realloc_output( out_ptr );
+        DisasmStatus err = realloc_output( out_ptr );
+        CHECK_ERR_(err);
     }
 
     memcpy( out_ptr->curr_char_ptr, char_arr, nchars );
@@ -148,7 +149,7 @@ DisasmStatus write_chars_to_output( Output *out_ptr, char* char_arr, size_t ncha
     return DISASM_STATUS_OK;
 }
 
-inline void print_header_( Binary binary, Output *out_ptr )
+inline DisasmStatus print_header_( Binary binary, Output *out_ptr )
 {
     WRITE(out_ptr, "SIGN: ");
     for (size_t sign_ind = 0; sign_ind < sizeof(BIN_HEADER_SIGN_t); sign_ind++)
@@ -158,6 +159,8 @@ inline void print_header_( Binary binary, Output *out_ptr )
     WRITE(out_ptr, "\n");
 
     WRITE(out_ptr, "VERSION: %d\n", *( (BIN_HEADER_VERSION_t*) (binary.bin_arr + sizeof(BIN_HEADER_SIGN_t)) ) );
+
+    return DISASM_STATUS_OK;
 }
 
 inline DisasmStatus print_curr_cmd_name( Binary *binary_ptr, Output *out_ptr)
@@ -229,7 +232,12 @@ Output disassemble( Binary binary )
 {
     Output out = {};
 
-    print_header_(binary, &out);
+    DisasmStatus err_header = print_header_(binary, &out);
+    if (err_header)
+    {
+        out.err = err_header;
+        return out;
+    }
 
     binary.ip = HEADER_SIZE_IN_BYTES;
     while (binary.ip < binary.binary_size)
