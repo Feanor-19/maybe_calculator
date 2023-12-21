@@ -196,7 +196,7 @@ inline Label* realloc_labels_if_needed( Label *labels, size_t labels_ind, size_t
     if ( labels_ind >= *labels_cap )
     {
         *labels_cap *= 2;
-        return (Label*) realloc( labels, *labels_cap );
+        return (Label*) realloc( labels, *labels_cap * sizeof(Label) );
     }
 
     return labels;
@@ -205,7 +205,7 @@ inline Label* realloc_labels_if_needed( Label *labels, size_t labels_ind, size_t
 //! @brief Checks if str contains a valid label (without spaces in it and ends with ':')
 // and remembers label's location and name.
 inline AssemblerStatus check_if_label_and_handle( const char *str, size_t bin_arr_ind,
-                                                  Label labels[], size_t *labels_cap)
+                                                  Label **labels_ptr, size_t *labels_cap)
 {
     char label[LABEL_NAME_MAX_LEN] = "---";
     if ( sscanf(str, "%s", label) != 1 || !check_last_char(label, ':'))
@@ -213,15 +213,15 @@ inline AssemblerStatus check_if_label_and_handle( const char *str, size_t bin_ar
 
     static size_t labels_ind = 0;
 
-    if ( find_label(labels, labels_cap, label) )
+    if ( find_label(*labels_ptr, labels_cap, label) )
         return ASM_STATUS_ERROR_LABEL_REDEFINED;
 
     Label tmp = {};
     tmp.bin_arr_ind = bin_arr_ind;
     strncpy(tmp.name, label, strlen(label) - 1);
 
-    labels = realloc_labels_if_needed( labels, labels_ind, labels_cap );
-    labels[labels_ind++] = tmp;
+    *labels_ptr = realloc_labels_if_needed( *labels_ptr, labels_ind, labels_cap );
+    (*labels_ptr)[labels_ind++] = tmp;
     return ASM_STATUS_CURR_LINE_IS_A_LABEL;
 }
 
@@ -232,7 +232,10 @@ inline AssemblerStatus handle_fixup(int8_t* bin_arr, Stack *fixup_stk_ptr, Label
     {
         Label *lbl_ptr = find_label(labels, labels_cap, fixup.label_name );
         if (!lbl_ptr)
+        {
+            fprintf(stderr, "ERROR: LABEL NOT DEFINED: %s\n", fixup.label_name);
             return ASM_STATUS_ERROR_UNDEFINED_LABEL;
+        }
 
         *((cs_offset_t *) (bin_arr + fixup.cs_offset_arg_location)) = (cs_offset_t) (lbl_ptr->bin_arr_ind - HEADER_SIZE_IN_BYTES);
     }
@@ -269,7 +272,7 @@ BinOut translate_to_binary(Input input)
         if ( is_str_empty(input.text.line_array[ind]) ) continue;
 
         AssemblerStatus label_status = check_if_label_and_handle( input.text.line_array[ind],
-                                                                  bin_arr_ind, labels,
+                                                                  bin_arr_ind, &labels,
                                                                   &labels_cap);
         if (label_status == ASM_STATUS_CURR_LINE_IS_A_LABEL)
             continue;

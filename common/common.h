@@ -123,7 +123,7 @@ const BIN_HEADER_FILE_SIZE_t HEADER_SIZE_IN_BYTES = sizeof(BIN_HEADER_SIGN_t) + 
 
 const spu_stack_elem_t COMPUTATIONAL_MULTIPLIER = 1000;
 const cs_offset_t CS_OFFSET_POISON_VALUE = -1;
-const size_t MEMORY_SIZE = 128;
+const size_t MEMORY_SIZE = 1024;
 
 //----------------------------------------------------------------------------------------------------
 

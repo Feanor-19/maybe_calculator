@@ -9,7 +9,7 @@
 //! @brief Everything between this symbol and the end of line is considered as a comment.
 const char COMMENT_SYMB = ';';
 const size_t LABEL_NAME_MAX_LEN = 50;
-const size_t DEFAULT_LABELS_COUNT = 2; //TODO - поменять массив меток на динамический, может быть список?
+const size_t DEFAULT_LABELS_COUNT = 10;
 
 //-------------------------------------------------------------------------------------------------------------
 
