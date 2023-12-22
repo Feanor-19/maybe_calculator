@@ -349,7 +349,7 @@ DEF_CMD(PRN,        19, 0, 0, 0, 0, {
 
     _EXTERN_NUM_T to_print = _CAST_IM_CONST_TO_PROG_RES( num_raw );
 
-    fprintf(stdout, "%g", to_print );
+    fprintf(stdout, "%g\n", to_print );
 
     _IP += _CMD_BYTE_SIZE + _INFO_BYTE_SIZE;
 })

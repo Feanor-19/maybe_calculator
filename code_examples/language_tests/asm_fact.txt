@@ -9,7 +9,11 @@ POP rdx
 POP [rdx]
 
 PUSH 1.000000
-POP [1]
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+POP [rdx]
 
 PUSH rbx
 PUSH 0
@@ -67,14 +71,6 @@ ADD
 POP rdx
 POP [rdx]
 
-PUSH rcx
-POP rbx
-
-PUSH 9
-PUSH rbx
-ADD
-POP rcx
-
 PUSH rbx
 PUSH 0
 SUB
@@ -87,11 +83,19 @@ POP rdx
 PUSH [rdx]
 SUB
 
-PUSH rbx
+PUSH rcx
 PUSH 0
 SUB
 POP rdx
 POP [rdx]
+PUSH rcx
+POP rbx
+
+PUSH rbx
+PUSH 4
+SUB
+POP rcx
+
 CALL func_0
 PUSH rax
 
@@ -148,20 +152,20 @@ ADD
 POP rdx
 POP [rdx]
 
-PUSH rcx
-POP rbx
-
-PUSH 9
-PUSH rbx
-ADD
-POP rcx
-
 PUSH [0]
-PUSH rbx
+PUSH rcx
 PUSH 0
 SUB
 POP rdx
 POP [rdx]
+PUSH rcx
+POP rbx
+
+PUSH rbx
+PUSH 4
+SUB
+POP rcx
+
 CALL func_0
 PUSH rax
 
