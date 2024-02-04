@@ -110,6 +110,8 @@ const size_t NUMBER_OF_SPU_VERIFY_RES_FLAGS = 5;
 static_assert(sizeof(spu_verification_messages)/sizeof(spu_verification_messages[0]) == NUMBER_OF_SPU_VERIFY_RES_FLAGS,
                 "Number of verification messages isn't the same as number of verify flags!");
 
+const size_t SPU_DUMP_WIDTH = 32;
+
 //-------------------------------------------------------------------------------------------------------------
 
 SPUStatus SPU_ctor(SPU* spu_ptr, Config cfg);

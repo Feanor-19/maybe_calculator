@@ -1,29 +1,242 @@
 PUSH 1021
 POP rcx
 JMP main
-main:
-PUSH 65.000000
+func_0:
+PUSH rbx
+PUSH 2
+ADD
+POP rdx
+POP [rdx]
+
+PUSH 0.000000
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
+MUL
+
+PUSH 4.000000
+PUSH rbx
+PUSH 0
+SUB
+POP rdx
+PUSH [rdx]
+MUL
+
+PUSH rbx
+PUSH 2
+SUB
+POP rdx
+PUSH [rdx]
+MUL
+
+SUB
+
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+PUSH [rdx]
+POP rax
+PUSH rbx
+POP rcx
+
+PUSH rbx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
+POP rbx
+
+PUSH rcx
+PUSH 2
+ADD
+POP rdx
+PUSH [rdx]
+RET
+
+PUSH rbx
+POP rcx
+
+PUSH rbx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
+POP rbx
+
+PUSH rcx
+PUSH 2
+ADD
+POP rdx
+PUSH [rdx]
+RET
+
+
+func_1:
+PUSH rbx
+PUSH 2
+ADD
+POP rdx
+POP [rdx]
+
+PUSH 0.000000
+PUSH rbx
+PUSH 2
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
+PUSH -1
+MUL
+PUSH rbx
+PUSH 0
+SUB
+POP rdx
+PUSH [rdx]
+DIV
+
+PUSH rbx
+PUSH 2
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 2
+SUB
+POP rdx
+PUSH [rdx]
+POP rax
+PUSH rbx
+POP rcx
+
+PUSH rbx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
+POP rbx
+
+PUSH rcx
+PUSH 2
+ADD
+POP rdx
+PUSH [rdx]
+RET
+
+PUSH rbx
+POP rcx
+
+PUSH rbx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
+POP rbx
+
+PUSH rcx
+PUSH 2
+ADD
+POP rdx
+PUSH [rdx]
+RET
+
+
+func_2:
+PUSH rbx
+PUSH 2
+ADD
+POP rdx
+POP [rdx]
+
+PUSH 0.000000
+PUSH rbx
+PUSH 2
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 0
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rbx
+PUSH 2
+SUB
+POP rdx
+PUSH [rdx]
+JE cmp_yes_0
+PUSH 0
+JMP cmp_end_0
+cmp_yes_0:
+PUSH 1
+cmp_end_0:
+
+PUSH 0
+JE if_else_0
+PUSH 1.000000
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+POP [rdx]
+
+PUSH 87.000000
 PRC
 
-PUSH 97.000000
+PUSH 101.000000
 PRC
 
-PUSH 97.000000
+PUSH 108.000000
 PRC
 
-PUSH 97.000000
+PUSH 108.000000
 PRC
 
-PUSH 97.000000
+PUSH 44.000000
 PRC
 
 PUSH 32.000000
 PRC
 
-PUSH 105.000000
+PUSH 116.000000
 PRC
 
-PUSH 116.000000
+PUSH 104.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 114.000000
+PRC
+
+PUSH 101.000000
 PRC
 
 PUSH 32.000000
@@ -33,6 +246,24 @@ PUSH 105.000000
 PRC
 
 PUSH 115.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 107.000000
+PRC
+
+PUSH 105.000000
+PRC
+
+PUSH 110.000000
+PRC
+
+PUSH 100.000000
+PRC
+
+PUSH 97.000000
 PRC
 
 PUSH 32.000000
@@ -50,19 +281,64 @@ PRC
 PUSH 32.000000
 PRC
 
+PUSH 119.000000
+PRC
+
+PUSH 104.000000
+PRC
+
+PUSH 111.000000
+PRC
+
+PUSH 108.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 105.000000
+PRC
+
+PUSH 110.000000
+PRC
+
 PUSH 102.000000
 PRC
 
 PUSH 105.000000
 PRC
 
-PUSH 114.000000
+PUSH 110.000000
 PRC
 
-PUSH 115.000000
+PUSH 105.000000
 PRC
 
 PUSH 116.000000
+PRC
+
+PUSH 121.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 97.000000
+PRC
+
+PUSH 110.000000
+PRC
+
+PUSH 100.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 97.000000
 PRC
 
 PUSH 32.000000
@@ -71,10 +347,127 @@ PRC
 PUSH 115.000000
 PRC
 
-PUSH 116.000000
+PUSH 109.000000
+PRC
+
+PUSH 97.000000
+PRC
+
+PUSH 108.000000
+PRC
+
+PUSH 108.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 99.000000
+PRC
+
+PUSH 97.000000
 PRC
 
 PUSH 114.000000
+PRC
+
+PUSH 114.000000
+PRC
+
+PUSH 105.000000
+PRC
+
+PUSH 97.000000
+PRC
+
+PUSH 103.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 111.000000
+PRC
+
+PUSH 102.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 114.000000
+PRC
+
+PUSH 111.000000
+PRC
+
+PUSH 111.000000
+PRC
+
+PUSH 116.000000
+PRC
+
+PUSH 115.000000
+PRC
+
+PUSH 46.000000
+PRC
+
+PUSH 46.000000
+PRC
+
+PUSH 46.000000
+PRC
+
+PUSH 10.000000
+PRC
+
+PUSH 13.000000
+PRC
+
+PUSH 81.000000
+PRC
+
+PUSH 117.000000
+PRC
+
+PUSH 105.000000
+PRC
+
+PUSH 116.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 105.000000
+PRC
+
+PUSH 110.000000
+PRC
+
+PUSH 116.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 114.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 115.000000
+PRC
+
+PUSH 116.000000
 PRC
 
 PUSH 105.000000
@@ -86,25 +479,112 @@ PRC
 PUSH 103.000000
 PRC
 
+PUSH 44.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 116.000000
+PRC
+
+PUSH 104.000000
+PRC
+
+PUSH 97.000000
+PRC
+
+PUSH 116.000000
+PRC
+
+PUSH 39.000000
+PRC
+
+PUSH 115.000000
+PRC
+
 PUSH 32.000000
 PRC
 
 PUSH 97.000000
 PRC
 
-PUSH 97.000000
+PUSH 108.000000
+PRC
+
+PUSH 115.000000
+PRC
+
+PUSH 111.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 110.000000
+PRC
+
+PUSH 111.000000
+PRC
+
+PUSH 116.000000
+PRC
+
+PUSH 32.000000
 PRC
 
 PUSH 97.000000
 PRC
 
-PUSH 97.000000
+PUSH 32.000000
+PRC
+
+PUSH 108.000000
+PRC
+
+PUSH 105.000000
+PRC
+
+PUSH 110.000000
+PRC
+
+PUSH 101.000000
 PRC
 
 PUSH 97.000000
 PRC
 
+PUSH 114.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 113.000000
+PRC
+
+PUSH 117.000000
+PRC
+
 PUSH 97.000000
+PRC
+
+PUSH 116.000000
+PRC
+
+PUSH 105.000000
+PRC
+
+PUSH 111.000000
+PRC
+
+PUSH 110.000000
+PRC
+
+PUSH 46.000000
 PRC
 
 PUSH 10.000000
@@ -113,64 +593,1091 @@ PRC
 PUSH 13.000000
 PRC
 
-IN
+PUSH 73.000000
+PRC
 
+PUSH 116.000000
+PRC
+
+PUSH 39.000000
+PRC
+
+PUSH 115.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 110.000000
+PRC
+
+PUSH 111.000000
+PRC
+
+PUSH 116.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 97.000000
+PRC
+
+PUSH 110.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 113.000000
+PRC
+
+PUSH 117.000000
+PRC
+
+PUSH 97.000000
+PRC
+
+PUSH 116.000000
+PRC
+
+PUSH 105.000000
+PRC
+
+PUSH 111.000000
+PRC
+
+PUSH 110.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 97.000000
+PRC
+
+PUSH 116.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 97.000000
+PRC
+
+PUSH 108.000000
+PRC
+
+PUSH 108.000000
+PRC
+
+PUSH 58.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 116.000000
+PRC
+
+PUSH 104.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 114.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 97.000000
+PRC
+
+PUSH 114.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 115.000000
+PRC
+
+PUSH 105.000000
+PRC
+
+PUSH 109.000000
+PRC
+
+PUSH 112.000000
+PRC
+
+PUSH 108.000000
+PRC
+
+PUSH 121.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 110.000000
+PRC
+
+PUSH 111.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 114.000000
+PRC
+
+PUSH 111.000000
+PRC
+
+PUSH 111.000000
+PRC
+
+PUSH 116.000000
+PRC
+
+PUSH 115.000000
+PRC
+
+PUSH 44.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 118.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 110.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 105.000000
+PRC
+
+PUSH 109.000000
+PRC
+
+PUSH 97.000000
+PRC
+
+PUSH 103.000000
+PRC
+
+PUSH 105.000000
+PRC
+
+PUSH 110.000000
+PRC
+
+PUSH 97.000000
+PRC
+
+PUSH 114.000000
+PRC
+
+PUSH 121.000000
+PRC
+
+PUSH 32.000000
+PRC
+
+PUSH 111.000000
+PRC
+
+PUSH 110.000000
+PRC
+
+PUSH 101.000000
+PRC
+
+PUSH 115.000000
+PRC
+
+PUSH 33.000000
+PRC
+
+PUSH 10.000000
+PRC
+
+PUSH 13.000000
+PRC
+
+JMP if_end_0
+if_else_0:
+PUSH 0.000000
+PUSH rbx
+PUSH 4
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH rcx
+PUSH 1
+ADD
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 0
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rcx
+PUSH 0
+SUB
+POP rdx
+POP [rdx]
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rcx
+PUSH 1
+SUB
+POP rdx
+POP [rdx]
+PUSH rcx
+POP rbx
+
+PUSH rbx
+PUSH 5
+SUB
+POP rcx
+
+CALL func_1
+PUSH rax
+
+PUSH rbx
+PUSH 4
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 4
+SUB
+POP rdx
+PUSH [rdx]
+PRN
+
+if_end_0:
+
+PUSH rbx
+POP rcx
+
+PUSH rbx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
+POP rbx
+
+PUSH rcx
+PUSH 2
+ADD
+POP rdx
+PUSH [rdx]
+RET
+
+
+func_3:
+PUSH rbx
+PUSH 2
+ADD
+POP rdx
+POP [rdx]
+
+PUSH 0.000000
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
+PUSH -1
+MUL
+PUSH rbx
+PUSH 2
+SUB
+POP rdx
+PUSH [rdx]
+SQRT
+
+ADD
+
+PUSH 2.000000
+PUSH rbx
+PUSH 0
+SUB
+POP rdx
+PUSH [rdx]
+MUL
+
+DIV
+
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+PUSH [rdx]
+POP rax
+PUSH rbx
+POP rcx
+
+PUSH rbx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
+POP rbx
+
+PUSH rcx
+PUSH 2
+ADD
+POP rdx
+PUSH [rdx]
+RET
+
+PUSH rbx
+POP rcx
+
+PUSH rbx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
+POP rbx
+
+PUSH rcx
+PUSH 2
+ADD
+POP rdx
+PUSH [rdx]
+RET
+
+
+func_4:
+PUSH rbx
+PUSH 2
+ADD
+POP rdx
+POP [rdx]
+
+PUSH 0.000000
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+POP [rdx]
+
+PUSH 1.000000
+PUSH rbx
+PUSH 2
+SUB
+POP rdx
+POP [rdx]
+
+PUSH 0.000000
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 0
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+PUSH [rdx]
+JA cmp_yes_1
+PUSH 0
+JMP cmp_end_1
+cmp_yes_1:
+PUSH 1
+cmp_end_1:
+
+PUSH 0
+JE if_end_1
+PUSH 2.000000
+PUSH rbx
+PUSH 2
+SUB
+POP rdx
+PUSH [rdx]
+MUL
+
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
+POP rax
+PUSH rbx
+POP rcx
+
+PUSH rbx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
+POP rbx
+
+PUSH rcx
+PUSH 2
+ADD
+POP rdx
+PUSH [rdx]
+RET
+
+if_end_1:
+
+PUSH rbx
+PUSH 0
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+PUSH [rdx]
+JE cmp_yes_2
+PUSH 0
+JMP cmp_end_2
+cmp_yes_2:
+PUSH 1
+cmp_end_2:
+
+PUSH 0
+JE if_end_2
+PUSH 1.000000
+PUSH rbx
+PUSH 2
+SUB
+POP rdx
+PUSH [rdx]
+MUL
+
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
+POP rax
+PUSH rbx
+POP rcx
+
+PUSH rbx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
+POP rbx
+
+PUSH rcx
+PUSH 2
+ADD
+POP rdx
+PUSH [rdx]
+RET
+
+if_end_2:
+
+PUSH rbx
+PUSH 0
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+PUSH [rdx]
+JB cmp_yes_3
+PUSH 0
+JMP cmp_end_3
+cmp_yes_3:
+PUSH 1
+cmp_end_3:
+
+PUSH 0
+JE if_end_3
+PUSH 0.000000
+PUSH rbx
+PUSH 2
+SUB
+POP rdx
+PUSH [rdx]
+MUL
+
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
+POP rax
+PUSH rbx
+POP rcx
+
+PUSH rbx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
+POP rbx
+
+PUSH rcx
+PUSH 2
+ADD
+POP rdx
+PUSH [rdx]
+RET
+
+if_end_3:
+
+PUSH rbx
+POP rcx
+
+PUSH rbx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
+POP rbx
+
+PUSH rcx
+PUSH 2
+ADD
+POP rdx
+PUSH [rdx]
+RET
+
+
+func_5:
+PUSH rbx
+PUSH 2
+ADD
+POP rdx
+POP [rdx]
+
+PUSH 0.000000
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+POP [rdx]
+
+PUSH 1.000000
+PUSH rbx
+PUSH 4
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 0
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+PUSH [rdx]
+JE cmp_yes_4
+PUSH 0
+JMP cmp_end_4
+cmp_yes_4:
+PUSH 1
+cmp_end_4:
+
+PUSH 0
+JE if_else_4
+PUSH rbx
+PUSH rcx
+PUSH 1
+ADD
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rcx
+PUSH 0
+SUB
+POP rdx
+POP [rdx]
+PUSH rbx
+PUSH 2
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rcx
+PUSH 1
+SUB
+POP rdx
+POP [rdx]
+PUSH rcx
+POP rbx
+
+PUSH rbx
+PUSH 7
+SUB
+POP rcx
+
+CALL func_2
+PUSH rax
+
+JMP if_end_4
+if_else_4:
+PUSH 0.000000
+PUSH rbx
+PUSH 5
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH rcx
+PUSH 1
+ADD
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 0
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rcx
+PUSH 0
+SUB
+POP rdx
+POP [rdx]
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rcx
+PUSH 1
+SUB
+POP rdx
+POP [rdx]
+PUSH rbx
+PUSH 2
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rcx
+PUSH 2
+SUB
+POP rdx
+POP [rdx]
+PUSH rcx
+POP rbx
+
+PUSH rbx
+PUSH 6
+SUB
+POP rcx
+
+CALL func_0
+PUSH rax
+
+PUSH rbx
+PUSH 5
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 5
+SUB
+POP rdx
+PUSH [rdx]
+PRN
+
+PUSH 0.000000
+PUSH rbx
+PUSH 6
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH rcx
+PUSH 1
+ADD
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 5
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rcx
+PUSH 0
+SUB
+POP rdx
+POP [rdx]
+PUSH rcx
+POP rbx
+
+PUSH rbx
+PUSH 6
+SUB
+POP rcx
+
+CALL func_4
+PUSH rax
+
+PUSH rbx
+PUSH 6
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 6
+SUB
+POP rdx
+PUSH [rdx]
+PRN
+
+PUSH rbx
+PUSH 6
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rbx
+PUSH 3
+SUB
+POP rdx
+PUSH [rdx]
+JE cmp_yes_5
+PUSH 0
+JMP cmp_end_5
+cmp_yes_5:
+PUSH 1
+cmp_end_5:
+
+PUSH 0
+JE if_else_5
+PUSH 1.000000
+PUSH rbx
+PUSH 7
+SUB
+POP rdx
+POP [rdx]
+
+JMP if_end_5
+if_else_5:
+PUSH 0.000000
+PUSH rbx
+PUSH 8
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH rcx
+PUSH 1
+ADD
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 0
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rcx
+PUSH 0
+SUB
+POP rdx
+POP [rdx]
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rcx
+PUSH 1
+SUB
+POP rdx
+POP [rdx]
+PUSH rbx
+PUSH 5
+SUB
+POP rdx
+PUSH [rdx]
+PUSH rcx
+PUSH 2
+SUB
+POP rdx
+POP [rdx]
+PUSH rcx
+POP rbx
+
+PUSH rbx
+PUSH 6
+SUB
+POP rcx
+
+CALL func_3
+PUSH rax
+
+PUSH rbx
+PUSH 8
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 8
+SUB
+POP rdx
+PUSH [rdx]
+PRN
+
+PUSH rbx
+PUSH 6
+SUB
+POP rdx
+PUSH [rdx]
+PUSH 2.000000
+PUSH rbx
+PUSH 4
+SUB
+POP rdx
+PUSH [rdx]
+MUL
+
+JE cmp_yes_6
+PUSH 0
+JMP cmp_end_6
+cmp_yes_6:
+PUSH 1
+cmp_end_6:
+
+PUSH 0
+JE if_end_6
+PUSH 0.000000
+PUSH rbx
+PUSH 9
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
+PUSH -1
+MUL
+PUSH rbx
+PUSH 0
+SUB
+POP rdx
+PUSH [rdx]
+DIV
+
+PUSH rbx
+PUSH 8
+SUB
+POP rdx
+PUSH [rdx]
+SUB
+
+PUSH rbx
+PUSH 9
+SUB
+POP rdx
+POP [rdx]
+
+PUSH rbx
+PUSH 9
+SUB
+POP rdx
+PUSH [rdx]
+PRN
+
+if_end_6:
+
+if_end_5:
+
+if_end_4:
+
+PUSH rbx
+POP rcx
+
+PUSH rbx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
+POP rbx
+
+PUSH rcx
+PUSH 2
+ADD
+POP rdx
+PUSH [rdx]
+RET
+
+
+main:
+PUSH 1.000000
 POP [0]
 
-IN
-
+PUSH 0.000000
 POP [1]
 
 IN
 
 POP [2]
 
-PUSH 0.000000
+while_0:
+PUSH [2]
+PUSH [1]
+JNE cmp_yes_7
+PUSH 0
+JMP cmp_end_7
+cmp_yes_7:
+PUSH 1
+cmp_end_7:
+
+PUSH 0
+JE while_end_0
+IN
+
 POP [3]
 
-PUSH 0.000000
+IN
+
 POP [4]
 
-PUSH [1]
-PUSH [1]
-MUL
+IN
 
-PUSH 4.000000
+POP [5]
+
+PUSH rbx
+PUSH rcx
+PUSH 1
+ADD
+POP rdx
+POP [rdx]
+
+PUSH [3]
+PUSH rcx
+PUSH 0
+SUB
+POP rdx
+POP [rdx]
+PUSH [4]
+PUSH rcx
+PUSH 1
+SUB
+POP rdx
+POP [rdx]
+PUSH [5]
+PUSH rcx
+PUSH 2
+SUB
+POP rdx
+POP [rdx]
+PUSH rcx
+POP rbx
+
+PUSH rbx
+PUSH 12
+SUB
+POP rcx
+
+CALL func_5
+PUSH rax
+
+IN
+
 PUSH [0]
 MUL
 
-PUSH [2]
-MUL
+POP [2]
 
-SUB
+; dummy
 
-POP [3]
+; dummy
 
-PUSH [3]
-PUSH [4]
-JAE cmp_yes_0
-PUSH 0
-JMP cmp_end_0
-cmp_yes_0:
-PUSH 1
-cmp_end_0:
+; dummy
 
-PUSH 0
-JE if_else_0
-PUSH [3]
-PRN
-
-JMP if_end_0
-if_else_0:
-PUSH 19.000000
-POP [5]
-
-PUSH [5]
-PRN
-
-if_end_0:
-
-PUSH [3]
-PRN
+JMP while_0
+while_end_0:
 
 HLT

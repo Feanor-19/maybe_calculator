@@ -32,7 +32,7 @@ int main(int argc, const char *argv[])
     spu_err = SPU_ctor(&spu, cfg);
     PRINT_IF_SPU_ERROR_(spu_err);
 
-    extern_num_t prog_res = -1;
+    extern_num_t prog_res = 0;
     run_program(&spu, &prog_res);
     printf("Result of the program: <%lf>", prog_res);
 
@@ -246,10 +246,10 @@ inline void print_spu_header_and_cs_(SPU *spu_ptr)
 
     fprintf(stderr, "CODE SEGMENT:\n{\n");
 
-    const size_t row_width = 16;
+    const size_t row_width = SPU_DUMP_WIDTH;
     const size_t col_of_ip_on_this_row_default_value = row_width + 1;
     const size_t rows_count = spu_ptr->cs_size / row_width + ( spu_ptr->cs_size % row_width != 0 );
-    const size_t max_row_num_width = find_num_width( (int) (rows_count - 1) );
+    const size_t max_row_num_width = find_num_width( (int) (rows_count - 1)*row_width );
 
     print_cs_cols_indices_( row_width, max_row_num_width );
 
@@ -257,7 +257,7 @@ inline void print_spu_header_and_cs_(SPU *spu_ptr)
     {
         size_t col_of_ip_on_this_row = col_of_ip_on_this_row_default_value;
 
-        printf("%*lld: ", (int) max_row_num_width, row);
+        printf("%*lld: ", (int) max_row_num_width, row*row_width);
 
         for (size_t col = 0; col < row_width; col++)
         {
@@ -288,7 +288,7 @@ inline void print_spu_memory_(SPU *spu_ptr)
     fprintf(stderr, "MEMORY:\n");
 
     int elem_width = find_maximum_elem_width( spu_ptr->memory, MEMORY_SIZE );
-    const size_t max_num_of_cols = 64 / (elem_width + 1) + 1;
+    const size_t max_num_of_cols = 3*SPU_DUMP_WIDTH / (elem_width + 1) + 1;
 
     for (size_t ind = 0; ind < MEMORY_SIZE; ind++)
     {

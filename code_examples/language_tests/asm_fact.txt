@@ -1,28 +1,39 @@
-PUSH 1021
+PUSH 2
 POP rcx
 JMP main
+; tr_asm_text_seq_exec
+; tr_asm_text_func_def
 func_0:
-PUSH rbx
+PUSH rcx
 PUSH 2
+SUB
+POP rdx
+POP [rdx]
+
+; tr_asm_text_seq_exec
+; tr_asm_text_seq_exec
+; tr_asm_text_assign
+PUSH 1.000000
+PUSH rcx
+PUSH 1
 ADD
 POP rdx
 POP [rdx]
 
-PUSH 1.000000
-PUSH rbx
-PUSH 1
-SUB
-POP rdx
-POP [rdx]
+; tr_asm_text_assign END
 
-PUSH rbx
+; tr_asm_text_seq_exec
+; tr_asm_text_if
+; tr_asm_text_cmp_equal
+; helper_asm_text_cmp
+PUSH rcx
 PUSH 0
-SUB
+ADD
 POP rdx
 PUSH [rdx]
-PUSH rbx
+PUSH rcx
 PUSH 1
-SUB
+ADD
 POP rdx
 PUSH [rdx]
 JE cmp_yes_0
@@ -32,146 +43,236 @@ cmp_yes_0:
 PUSH 1
 cmp_end_0:
 
+; helper_asm_text_cmp END
+
 PUSH 0
 JE if_end_0
-PUSH rbx
+; tr_asm_text_return
+; computing ret value
+PUSH rcx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
+POP rax
+; push [reg_fr_ref - 2] (pushing ret address)
+PUSH rcx
+PUSH 2
+SUB
+POP rdx
+PUSH [rdx]
+
+; reg_fr_ref = mem[reg_fr_ref - 1] (updating reg_fr_ref)
+PUSH rcx
 PUSH 1
 SUB
 POP rdx
 PUSH [rdx]
-POP rax
-PUSH rbx
 POP rcx
 
-PUSH rbx
-PUSH 1
-ADD
-POP rdx
-PUSH [rdx]
-POP rbx
-
-PUSH rcx
-PUSH 2
-ADD
-POP rdx
-PUSH [rdx]
 RET
+
+; tr_asm_text_return END
 
 if_end_0:
 
-PUSH rbx
+; tr_asm_text_if END
+
+; tr_asm_text_return
+; computing ret value
+; tr_asm_text_mul
+PUSH rcx
 PUSH 0
-SUB
+ADD
 POP rdx
 PUSH [rdx]
-PUSH rbx
+; tr_asm_text_call_func
+; storing old reg_frame_ref value in the being created frame
+PUSH rcx
+PUSH 3 ; func_frame_size - 1
+ADD
+POP rdx
+PUSH rcx
+POP [rdx]
+
+; storing new reg_frame_ref into reg_tmp
+PUSH rdx
+PUSH 1
+ADD
+POP rbx
+
+; passing fact args (if there are any)
+; tr_asm_text_sub
+PUSH rcx
+PUSH 0
+ADD
+POP rdx
+PUSH [rdx]
 PUSH rcx
 PUSH 1
 ADD
 POP rdx
-POP [rdx]
-
-PUSH rbx
-PUSH 0
-SUB
-POP rdx
-PUSH [rdx]
-PUSH rbx
-PUSH 1
-SUB
-POP rdx
 PUSH [rdx]
 SUB
 
-PUSH rcx
-PUSH 0
-SUB
-POP rdx
-POP [rdx]
-PUSH rcx
-POP rbx
+; tr_asm_text_sub END
 
 PUSH rbx
-PUSH 4
-SUB
+PUSH 0 ; curr_fact_arg_id
+ADD
+POP rdx
+POP [rdx]
+; updating reg_frame_ref from reg_tmp to end the process of creating new frame
+PUSH rbx
 POP rcx
-
 CALL func_0
 PUSH rax
+
+; tr_asm_text_call_func END
 
 MUL
 
+; tr_asm_text_mul END
+
 POP rax
-PUSH rbx
-POP rcx
-
-PUSH rbx
-PUSH 1
-ADD
-POP rdx
-PUSH [rdx]
-POP rbx
-
+; push [reg_fr_ref - 2] (pushing ret address)
 PUSH rcx
 PUSH 2
-ADD
+SUB
 POP rdx
 PUSH [rdx]
-RET
 
-PUSH rbx
+; reg_fr_ref = mem[reg_fr_ref - 1] (updating reg_fr_ref)
+PUSH rcx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
 POP rcx
 
-PUSH rbx
-PUSH 1
-ADD
-POP rdx
-PUSH [rdx]
-POP rbx
-
-PUSH rcx
-PUSH 2
-ADD
-POP rdx
-PUSH [rdx]
 RET
 
+; tr_asm_text_return END
 
+; tr_asm_text_seq_exec END
+
+; tr_asm_text_seq_exec END
+
+; tr_asm_text_return
+; push [reg_fr_ref - 2] (pushing ret address)
+PUSH rcx
+PUSH 2
+SUB
+POP rdx
+PUSH [rdx]
+
+; reg_fr_ref = mem[reg_fr_ref - 1] (updating reg_fr_ref)
+PUSH rcx
+PUSH 1
+SUB
+POP rdx
+PUSH [rdx]
+POP rcx
+
+RET
+
+; tr_asm_text_return END
+
+; tr_asm_text_seq_exec END
+
+
+; tr_asm_text_func_def END
+
+; tr_asm_text_main_prog
 main:
+; tr_asm_text_seq_exec
+; tr_asm_text_assign
+; tr_asm_text_input
 IN
 
-POP [0]
+; tr_asm_text_input END
 
+PUSH rcx
+PUSH 0
+ADD
+POP rdx
+POP [rdx]
+
+; tr_asm_text_assign END
+
+; tr_asm_text_seq_exec
+; tr_asm_text_assign
 PUSH 0.000000
-POP [1]
-
-PUSH rbx
 PUSH rcx
 PUSH 1
 ADD
 POP rdx
 POP [rdx]
 
-PUSH [0]
+; tr_asm_text_assign END
+
+; tr_asm_text_seq_exec
+; tr_asm_text_assign
+; tr_asm_text_call_func
+; storing old reg_frame_ref value in the being created frame
 PUSH rcx
-PUSH 0
-SUB
+PUSH 3 ; func_frame_size - 1
+ADD
 POP rdx
-POP [rdx]
 PUSH rcx
+POP [rdx]
+
+; storing new reg_frame_ref into reg_tmp
+PUSH rdx
+PUSH 1
+ADD
 POP rbx
 
+; passing fact args (if there are any)
+PUSH rcx
+PUSH 0
+ADD
+POP rdx
+PUSH [rdx]
 PUSH rbx
-PUSH 4
-SUB
+PUSH 0 ; curr_fact_arg_id
+ADD
+POP rdx
+POP [rdx]
+; updating reg_frame_ref from reg_tmp to end the process of creating new frame
+PUSH rbx
 POP rcx
-
 CALL func_0
 PUSH rax
 
-POP [1]
+; tr_asm_text_call_func END
 
-PUSH [1]
+PUSH rcx
+PUSH 1
+ADD
+POP rdx
+POP [rdx]
+
+; tr_asm_text_assign END
+
+; tr_asm_text_print_num
+PUSH rcx
+PUSH 1
+ADD
+POP rdx
+PUSH [rdx]
 PRN
+
+; tr_asm_text_print_num END
+
+; tr_asm_text_seq_exec END
+
+; tr_asm_text_seq_exec END
+
+; tr_asm_text_seq_exec END
+
+; tr_asm_text_main_prog END
+
+; tr_asm_text_seq_exec END
 
 HLT
